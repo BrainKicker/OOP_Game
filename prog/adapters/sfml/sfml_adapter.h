@@ -24,6 +24,9 @@ private:
 
     inline static sf::Texture wall {};
     inline static sf::Texture grass {};
+    inline static sf::Texture player {};
+    inline static sf::Texture zombie {};
+    inline static sf::Texture skeleton {};
 
     static void __attribute__((constructor)) load_images();
 

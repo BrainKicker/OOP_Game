@@ -7,11 +7,11 @@ entity::entity_type entity::type() {
 }
 
 geo::i_point entity::coords() {
-    return geo::i_point();
+    return m_coords;
 }
 
 const geo::i_point entity::coords() const {
-    return geo::i_point();
+    return m_coords;
 }
 
 void entity::set_coords(geo::i_point coords) {

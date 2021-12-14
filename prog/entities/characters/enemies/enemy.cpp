@@ -33,6 +33,10 @@ enemy::enemy(enemy::enemy_type type, geo::i_point coords) : character(ENEMY, coo
     m_melee = enemy_infos[m_type].m_melee;
 }
 
+enemy::enemy_type enemy::type() const {
+    return m_type;
+}
+
 action enemy::get_action(const field& f) {
     return enemy_infos[m_type].m_strategy(*this, f);
 }

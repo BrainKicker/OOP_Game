@@ -144,7 +144,7 @@ void field::move_character(character* c, geo::i_point coords) {
     m_cells[c->coords().first][c->coords().second]->set_entity(nullptr);
     delete m_cells[coords.first][coords.second]->get_entity();
     m_cells[c->coords().first][c->coords().second]->set_entity(c);
-    c->coords() = coords;
+    c->set_coords(coords);
 }
 
 void field::handle_character_action(character* c, action act) {
@@ -176,8 +176,6 @@ void field::handle_character_action(character* c, action act) {
     if (next_coords.first < 0 || next_coords.first >= width())
         return;
     if (next_coords.second < 0 || next_coords.second >= height())
-        return;
-    if (m_cells[next_coords.first][next_coords.second]->type() == cell::WALL)
         return;
 
     cell* cel = m_cells[next_coords.first][next_coords.second];
@@ -260,7 +258,7 @@ field::field(int id)
     : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
     m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
     m_cells(m_width, m_height), m_directions(m_width, m_height),
-    m_player(new player()),
+    m_player(new player(m_entry)),
     m_enemies(), m_artifacts() {
 
     for (int x = 0; x < m_width; ++x) {
@@ -327,11 +325,23 @@ int field::height() {
     return m_height;
 }
 
-cell::cell_type field::get_cell_type(int x, int y) {
+cell::cell_type field::get_cell_type(int x, int y) const {
     return m_cells[x][y]->type();
 }
 
-game_condition field::get_game_condition() {
+const player& field::get_player() const {
+    return *m_player;
+}
+
+const vector<enemy*> field::get_enemies() const {
+    return m_enemies;
+}
+
+const vector<artifact*> field::get_artifacts() const {
+    return m_artifacts;
+}
+
+game_condition field::get_game_condition() const {
     return m_game_condition;
 }
 

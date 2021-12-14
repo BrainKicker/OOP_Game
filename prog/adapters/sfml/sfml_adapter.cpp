@@ -1,10 +1,11 @@
 #include "sfml_adapter.h"
 
 void __attribute__((constructor)) sfml_adapter::load_images() {
-    wall = sf::Texture();
     wall.loadFromFile("../assets/images/Wall.png");
-    grass = sf::Texture();
     grass.loadFromFile("../assets/images/Grass.png");
+    player.loadFromFile("../assets/images/Player.png");
+    zombie.loadFromFile("../assets/images/Zombie.png");
+    skeleton.loadFromFile("../assets/images/Skeleton.png");
 }
 
 void sfml_adapter::create_window() {
@@ -150,6 +151,29 @@ void sfml_adapter::draw() {
             im_cell.setScale(cell_width / im_cell.getLocalBounds().width, cell_height / im_cell.getLocalBounds().height);
             texture.draw(im_cell);
         }
+    }
+
+    for (const enemy* en : m_field_p->get_enemies()) {
+        sf::Sprite im_enemy;
+        switch (en->type()) {
+            case enemy::ZOMBIE:
+                im_enemy.setTexture(zombie);
+                break;
+            case enemy::SKELETON:
+                im_enemy.setTexture(skeleton);
+                break;
+        }
+        im_enemy.setPosition(border_width + en->coords().first * cell_width, border_width + en->coords().second * cell_height);
+        im_enemy.setScale(cell_width / im_enemy.getLocalBounds().width, cell_height / im_enemy.getLocalBounds().height);
+        texture.draw(im_enemy);
+    }
+
+    {
+        sf::Sprite im_player;
+        im_player.setTexture(player);
+        im_player.setPosition(border_width + m_field_p->get_player().coords().first * cell_width, border_width + m_field_p->get_player().coords().second * cell_height);
+        im_player.setScale(cell_width / im_player.getLocalBounds().width, cell_height / im_player.getLocalBounds().height);
+        texture.draw(im_player);
     }
 
     texture.display();

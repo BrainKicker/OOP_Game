@@ -90,9 +90,13 @@ public:
     int width();
     int height();
 
-    cell::cell_type get_cell_type(int x, int y);
+    cell::cell_type get_cell_type(int x, int y) const;
 
-    game_condition get_game_condition();
+    const player& get_player() const;
+    const vector<enemy*> get_enemies() const;
+    const vector<artifact*> get_artifacts() const;
+
+    game_condition get_game_condition() const;
 
     void move_player(geo::i_point coords);
 

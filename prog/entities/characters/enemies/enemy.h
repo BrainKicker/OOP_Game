@@ -40,6 +40,8 @@ public:
 
     enemy(enemy_type type, geo::i_point coords = { -1, -1 });
 
+    enemy_type type() const;
+
     action get_action(const field& f);
 };
 
