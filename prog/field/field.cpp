@@ -143,7 +143,7 @@ void field::mark_directions() {
 void field::move_character(character* c, geo::i_point coords) {
     m_cells[c->coords().first][c->coords().second]->set_entity(nullptr);
     delete m_cells[coords.first][coords.second]->get_entity();
-    m_cells[c->coords().first][c->coords().second]->set_entity(c);
+    m_cells[coords.first][coords.second]->set_entity(c);
     c->set_coords(coords);
 }
 
@@ -239,6 +239,8 @@ void field::handle_character_action(character* c, action act) {
 
 void field::players_turn() {
     handle_character_action(m_player, { action::TRY_TO_MOVE_ELSE_ATTACK, m_player->dir() });
+    if (m_player->dir() != direction::NONE && m_player->dir() != direction::UNDEFINED)
+        mark_directions();
 }
 
 void field::enemies_turn() {
@@ -247,10 +249,12 @@ void field::enemies_turn() {
 }
 
 void field::check_if_character_dead(character* c) {
-    if (c == m_player) {
-        m_game_condition = game_condition::LOSE;
-    } else if (c->type() == entity::ENEMY) {
-        delete_enemy((enemy*)c);
+    if (c->dead()) {
+        if (c == m_player) {
+            m_game_condition = game_condition::LOSE;
+        } else if (c->type() == entity::ENEMY) {
+            delete_enemy((enemy*)c);
+        }
     }
 }
 
@@ -280,7 +284,8 @@ field::field(int id)
     field_templates[id].enemies_generator(*this);
     field_templates[id].artifacts_generator(*this);
 
-    move_player(m_entry);
+    move_character(m_player, m_entry);
+    mark_directions();
 }
 
 field::~field() {
@@ -341,13 +346,16 @@ const vector<artifact*> field::get_artifacts() const {
     return m_artifacts;
 }
 
-game_condition field::get_game_condition() const {
-    return m_game_condition;
+geo::i_point field::get_entry_coords() const {
+    return m_entry;
 }
 
-void field::move_player(geo::i_point coords) {
-    move_character(m_player, coords);
-    mark_directions();
+geo::i_point field::get_exit_coords() const {
+    return m_exit;
+}
+
+game_condition field::get_game_condition() const {
+    return m_game_condition;
 }
 
 void field::add_enemy(enemy* en) {

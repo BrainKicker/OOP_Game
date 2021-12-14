@@ -26,8 +26,8 @@ public:
 
     entity_type type();
 
-    geo::i_point coords();
-    const geo::i_point coords() const;
+    geo::i_point& coords();
+    const geo::i_point& coords() const;
     void set_coords(geo::i_point coords);
 };
 

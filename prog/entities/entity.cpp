@@ -6,11 +6,11 @@ entity::entity_type entity::type() {
     return m_type;
 }
 
-geo::i_point entity::coords() {
+geo::i_point& entity::coords() {
     return m_coords;
 }
 
-const geo::i_point entity::coords() const {
+const geo::i_point& entity::coords() const {
     return m_coords;
 }
 

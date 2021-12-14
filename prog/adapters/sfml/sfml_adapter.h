@@ -27,6 +27,7 @@ private:
     inline static sf::Texture player {};
     inline static sf::Texture zombie {};
     inline static sf::Texture skeleton {};
+    inline static sf::Texture trapdoor {};
 
     static void __attribute__((constructor)) load_images();
 

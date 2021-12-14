@@ -96,9 +96,10 @@ public:
     const vector<enemy*> get_enemies() const;
     const vector<artifact*> get_artifacts() const;
 
-    game_condition get_game_condition() const;
+    geo::i_point get_entry_coords() const;
+    geo::i_point get_exit_coords() const;
 
-    void move_player(geo::i_point coords);
+    game_condition get_game_condition() const;
 
     void add_enemy(enemy* en);
     void add_artifact(artifact* art);

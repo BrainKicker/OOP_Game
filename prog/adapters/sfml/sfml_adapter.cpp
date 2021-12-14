@@ -6,6 +6,7 @@ void __attribute__((constructor)) sfml_adapter::load_images() {
     player.loadFromFile("../assets/images/Player.png");
     zombie.loadFromFile("../assets/images/Zombie.png");
     skeleton.loadFromFile("../assets/images/Skeleton.png");
+    trapdoor.loadFromFile("../assets/images/Trapdoor.png");
 }
 
 void sfml_adapter::create_window() {
@@ -136,6 +137,7 @@ void sfml_adapter::draw() {
     float cell_width = image_width / m_field_p->width();
     float cell_height = image_height / m_field_p->height();
 
+    // draw cells
     for (int i = 0; i < m_field_p->width(); ++i) {
         for (int j = 0; j < m_field_p->height(); ++j) {
             sf::Sprite im_cell;
@@ -153,6 +155,16 @@ void sfml_adapter::draw() {
         }
     }
 
+    // draw exit
+    {
+        sf::Sprite im_exit;
+        im_exit.setTexture(trapdoor);
+        im_exit.setPosition(border_width + m_field_p->get_exit_coords().first * cell_width, border_width + m_field_p->get_exit_coords().second * cell_height);
+        im_exit.setScale(cell_width / im_exit.getLocalBounds().width, cell_height / im_exit.getLocalBounds().height);
+        texture.draw(im_exit);
+    }
+
+    // draw enemies
     for (const enemy* en : m_field_p->get_enemies()) {
         sf::Sprite im_enemy;
         switch (en->type()) {
@@ -168,6 +180,7 @@ void sfml_adapter::draw() {
         texture.draw(im_enemy);
     }
 
+    // draw player
     {
         sf::Sprite im_player;
         im_player.setTexture(player);
