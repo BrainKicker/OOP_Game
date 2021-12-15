@@ -18,7 +18,7 @@ void sfml_adapter::create_field() {
 
 void sfml_adapter::create_window() {
     delete_window();
-    m_window = new sf::RenderWindow(sf::VideoMode(m_window_width, m_window_height), window_name);
+    m_window = new RenderWindow(m_window_width, m_window_height, window_name);
 }
 
 void sfml_adapter::delete_window() {
@@ -66,13 +66,7 @@ void sfml_adapter::handle_event(const sf::Event& event) {
                     m_field_p->send_sygnal(sygnal::RESTART);
                     break;
                 case sf::Keyboard::F11:
-                    if (m_fullscreen) {
-                        m_window->create(sf::VideoMode(prev_size.first, prev_size.second), window_name);
-                    } else {
-                        prev_size = { m_window->getSize().x, m_window->getSize().y };
-                        m_window->create(sf::VideoMode(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height), window_name, sf::Style::Fullscreen);
-                    }
-                    m_fullscreen = !m_fullscreen;
+                    m_window->switchFullscreen();
                     break;
                 case sf::Keyboard::Escape:
                     m_window->close();

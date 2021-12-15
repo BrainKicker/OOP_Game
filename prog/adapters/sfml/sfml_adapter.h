@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "../../field/field.h"
+#include "window/RenderWindow.h"
 
 class sfml_adapter {
 
@@ -45,9 +46,7 @@ private:
     int m_field_id;
     field_s_ptr m_field_p;
 
-    sf::RenderWindow* m_window;
-    bool m_fullscreen = false;
-    geo::i_point prev_size;
+    RenderWindow* m_window;
 
     void create_field();
 
