@@ -34,7 +34,7 @@ void sfml_adapter::handle_event(const sf::Event& event) {
         case sf::Event::Resized:
             m_window_width = m_window->getSize().x;
             m_window_height = m_window->getSize().y;
-            ((sf::View*)&m_window->getView())->reset(sf::FloatRect(0, 0, m_window_width, m_window_height));
+            ((sf::View&) m_window->getView()).reset(sf::FloatRect(0, 0, m_window_width, m_window_height));
             break;
         case sf::Event::LostFocus:
         case sf::Event::GainedFocus:
@@ -110,7 +110,7 @@ void sfml_adapter::clear() {
 
 void sfml_adapter::draw() {
 
-    float border_width = (m_window_width + m_window_height) / 2 * s_border_ratio;
+    float border_width = std::min(m_window_width, m_window_height) * s_border_ratio;
     border_width = std::max((float) s_min_border_width, border_width);
     border_width = std::min((float) s_max_border_width, border_width);
 

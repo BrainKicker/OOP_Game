@@ -11,7 +11,7 @@
 
 int main() {
 
-    sfml_adapter adapter(3);
+    sfml_adapter adapter(1);
     adapter.start();
 
 //    character c;

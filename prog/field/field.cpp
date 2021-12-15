@@ -142,14 +142,30 @@ void field::mark_directions() {
             m_directions[x][y] = direction::UNDEFINED;
     m_directions[m_player->coords().first][m_player->coords().second] = direction::NONE;
 
+    vector<pair<geo::i_point,direction>> neighbors;
+
     while (!q.empty()) {
         geo::i_point cur = q.pop();
-        std::initializer_list<pair<geo::i_point,direction>> neighbors = {
-                { { cur.first - 1, cur.second }, direction::RIGHT },
-                { { cur.first, cur.second - 1 }, direction::DOWN },
-                { { cur.first + 1, cur.second }, direction::LEFT },
-                { { cur.first, cur.second + 1 }, direction::UP }
-        };
+        neighbors.add({ { cur.first - 1, cur.second }, direction::RIGHT });
+        neighbors.add({ { cur.first, cur.second - 1 }, direction::DOWN });
+        neighbors.add({ { cur.first + 1, cur.second }, direction::LEFT });
+        neighbors.add({ { cur.first, cur.second + 1 }, direction::UP });
+        if (cur.first - 1 >= 0 && cur.first - 1 < width())
+            if (cur.second >= 0 && cur.second < height())
+                if (m_cells[cur.first - 1][cur.second]->type() != cell::WALL)
+                    neighbors.add({ { cur.first - 1, cur.second + 1 }, direction::UP });
+        if (cur.first >= 0 && cur.first < width())
+            if (cur.second - 1 >= 0 && cur.second - 1 < height())
+                if (m_cells[cur.first][cur.second - 1]->type() != cell::WALL)
+                    neighbors.add({ { cur.first - 1, cur.second - 1 }, direction::RIGHT });
+        if (cur.first + 1 >= 0 && cur.first + 1 < width())
+            if (cur.second >= 0 && cur.second < height())
+                if (m_cells[cur.first + 1][cur.second]->type() != cell::WALL)
+                    neighbors.add({ { cur.first + 1, cur.second - 1 }, direction::DOWN });
+        if (cur.first >= 0 && cur.first < width())
+            if (cur.second + 1 >= 0 && cur.second + 1 < height())
+                if (m_cells[cur.first][cur.second + 1]->type() != cell::WALL)
+                    neighbors.add({ { cur.first + 1, cur.second + 1 }, direction::LEFT });
         for (const auto& n : neighbors) {
             if (n.first.first >= 0 && n.first.first < width() && n.first.second >= 0 && n.first.second < height()) {
                 if (m_cells[n.first.first][n.first.second]->type() != cell::WALL) {
@@ -160,6 +176,7 @@ void field::mark_directions() {
                 }
             }
         }
+        neighbors.resize(0);
     }
 }
 

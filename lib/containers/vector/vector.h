@@ -48,6 +48,7 @@ public:
 
     void resize(int n);
     void reserve(int n);
+    void clear();
 
     void add(const T& elem);
     void add(T&& elem);
@@ -162,7 +163,8 @@ template <typename T>
 void vector<T>::resize(int n) {
     if (n > m_capacity)
         reserve(n);
-    m_size = n;
+    while (m_size > n)
+        remove(m_size - 1);
 }
 
 template <typename T>
@@ -175,6 +177,11 @@ void vector<T>::reserve(int n) {
         m_capacity = n;
         m_arr = new_arr;
     }
+}
+
+template <typename T>
+void vector<T>::clear() {
+    resize(0);
 }
 
 template <typename T>
