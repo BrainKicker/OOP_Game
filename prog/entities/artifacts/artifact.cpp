@@ -50,9 +50,9 @@ const vector<artifact::artifact_info> artifact::artifact_infos = {
         }
 };
 
-artifact::artifact(int id) : entity(ARTIFACT), m_id(id) {}
+artifact::artifact(artifact_id id, geo::i_point coords) : entity(ARTIFACT, coords), m_id(id) {}
 
-int artifact::id() {
+artifact::artifact_id artifact::id() const {
     return m_id;
 }
 

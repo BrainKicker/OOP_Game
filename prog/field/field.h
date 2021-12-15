@@ -20,7 +20,8 @@ enum class sygnal {
     DOWN,
     LEFT,
     RIGHT,
-    STEP
+    STEP,
+    RESTART
 };
 
 enum class game_condition {
@@ -66,6 +67,8 @@ private:
     vector<enemy*> m_enemies;
     vector<artifact*> m_artifacts;
 
+    bool m_instant_step_on_action = true;
+
     game_condition m_game_condition = game_condition::RUNNING;
 
     void mark_directions();
@@ -78,6 +81,10 @@ private:
     void enemies_turn();
 
     void check_if_character_dead(character* c);
+
+    void load();
+    void reload();
+    void clear();
 
 public:
 

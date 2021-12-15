@@ -16,7 +16,7 @@ public:
 
     using artifact_action = std::function<void(character*)>;
 
-    enum artifact_ids {
+    enum artifact_id {
         PROTEIN = 0,
         APPLE,
         KNIFE,
@@ -35,13 +35,13 @@ private:
 
     static const vector<artifact_info> artifact_infos;
 
-    int m_id;
+    artifact_id m_id;
 
 public:
 
-    artifact(int id);
+    artifact(artifact_id id, geo::i_point coords = { -1, -1 });
 
-    int id();
+    artifact_id id() const;
 
     static void act(artifact* art, character* ch);
     static void react(artifact* art, character* ch);

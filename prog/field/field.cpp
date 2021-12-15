@@ -17,14 +17,22 @@ const vector<field::field_template> field::field_templates = {
             },
             [](field& f) {
                 for (enemy* e : {
-                    new enemy(enemy::ZOMBIE, { 6, 2 }),
+                    new enemy(enemy::ZOMBIE, { 6, 1 }),
                     new enemy(enemy::ZOMBIE, { 6, 7 })
                     }) {
                     f.add_enemy(e);
                 }
             },
             [](field& f) {
-
+                for (artifact* e : {
+                        new artifact(artifact::PROTEIN, { 6, 4 }),
+                        new artifact(artifact::PROTEIN, { 6, 5 }),
+                        new artifact(artifact::KNIFE, { 5, 4 }),
+                        new artifact(artifact::KNIFE, { 7, 4 }),
+                        new artifact(artifact::KNIFE, { 1, 4 })
+                }) {
+                    f.add_artifact(e);
+                }
             }
         },
         {
@@ -50,7 +58,12 @@ const vector<field::field_template> field::field_templates = {
                 }
             },
             [](field& f) {
-
+                for (artifact* e : {
+                        new artifact(artifact::APPLE, { 0, 3 }),
+                        new artifact(artifact::KNIFE, { 5, 6 })
+                }) {
+                    f.add_artifact(e);
+                }
             }
         },
         {
@@ -77,7 +90,12 @@ const vector<field::field_template> field::field_templates = {
                 }
             },
             [](field& f) {
-
+                for (artifact* e : {
+                        new artifact(artifact::PROTEIN, { 1, 5 }),
+                        new artifact(artifact::KNIFE, { 6, 6 })
+                }) {
+                    f.add_artifact(e);
+                }
             }
         },
         {
@@ -105,7 +123,12 @@ const vector<field::field_template> field::field_templates = {
                 }
             },
             [](field& f) {
-
+                for (artifact* e : {
+                        new artifact(artifact::APPLE, { 1, 5 }),
+                        new artifact(artifact::KNIFE, { 6, 6 })
+                }) {
+                    f.add_artifact(e);
+                }
             }
         }
 };
@@ -187,8 +210,13 @@ void field::handle_character_action(character* c, action act) {
 
     switch (act.m_type) {
         case action::MOVE:
-            if (ent == nullptr)
+            if (ent == nullptr) {
                 move_character(c, next_coords);
+            } else if (ent->type() == entity::ARTIFACT) {
+                c->get_artifact(remove_artifact((artifact*) ent));
+                cel->set_entity(nullptr);
+                move_character(c, next_coords);
+            }
             break;
         case action::ATTACK:
             if (ent == nullptr) {
@@ -201,11 +229,6 @@ void field::handle_character_action(character* c, action act) {
                             c->attack((character*)ent);
                             check_if_character_dead((character*)ent);
                         }
-                        break;
-                    case entity::ARTIFACT:
-                        c->get_artifact((artifact*) ent);
-                        cel->set_entity(nullptr);
-                        move_character(c, next_coords);
                         break;
                     default:
                         break;
@@ -225,7 +248,7 @@ void field::handle_character_action(character* c, action act) {
                         }
                         break;
                     case entity::ARTIFACT:
-                        c->get_artifact((artifact*) ent);
+                        c->get_artifact(remove_artifact((artifact*) ent));
                         cel->set_entity(nullptr);
                         move_character(c, next_coords);
                         break;
@@ -258,16 +281,15 @@ void field::check_if_character_dead(character* c) {
     }
 }
 
-field::field(int id)
-    : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
-    m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
-    m_cells(m_width, m_height), m_directions(m_width, m_height),
-    m_player(new player(m_entry)),
-    m_enemies(), m_artifacts() {
+void field::load() {
+
+    m_game_condition = game_condition::RUNNING;
+
+    m_player = new player(m_entry);
 
     for (int x = 0; x < m_width; ++x) {
         for (int y = 0; y < m_height; ++y) {
-            char c = field_templates[id].m_cells[y][x];
+            char c = field_templates[m_id].m_cells[y][x];
             switch (c) {
                 case CELL_GROUND_SYMBOL:
                     m_cells[x][y] = new cell(cell::GROUND);
@@ -281,41 +303,69 @@ field::field(int id)
         }
     }
 
-    field_templates[id].enemies_generator(*this);
-    field_templates[id].artifacts_generator(*this);
+    field_templates[m_id].enemies_generator(*this);
+    field_templates[m_id].artifacts_generator(*this);
 
     move_character(m_player, m_entry);
     mark_directions();
 }
 
-field::~field() {
-//    m_cells[m_player->coords().first][m_player->coords().second]->set_entity(nullptr);
-//    delete m_player;
-//    while (!m_enemies.empty())
-//        delete_enemy(0);
-//    while (!m_artifacts.empty())
-//        delete_artifact(0);
+void field::reload() {
+    clear();
+    load();
+}
+
+void field::clear() {
+    m_cells[m_player->coords().first][m_player->coords().second]->set_entity(nullptr);
+    delete m_player;
+    while (!m_enemies.empty())
+        delete_enemy(0);
+    while (!m_artifacts.empty())
+        delete_artifact(0);
     for (int x = 0; x < width(); ++x)
         for (int y = 0; y < height(); ++y)
             delete m_cells[x][y];
+}
+
+field::field(int id)
+    : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
+    m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
+    m_cells(m_width, m_height), m_directions(m_width, m_height),
+    m_enemies(), m_artifacts() {
+    load();
+}
+
+field::~field() {
+    clear();
 }
 
 void field::send_sygnal(sygnal signal) {
     switch (signal) {
         case sygnal::UP:
             m_player->set_dir(direction::UP);
+            if (m_instant_step_on_action)
+                step();
             break;
         case sygnal::DOWN:
             m_player->set_dir(direction::DOWN);
+            if (m_instant_step_on_action)
+                step();
             break;
         case sygnal::LEFT:
             m_player->set_dir(direction::LEFT);
+            if (m_instant_step_on_action)
+                step();
             break;
         case sygnal::RIGHT:
             m_player->set_dir(direction::RIGHT);
+            if (m_instant_step_on_action)
+                step();
             break;
         case sygnal::STEP:
             step();
+            break;
+        case sygnal::RESTART:
+            reload();
             break;
         default:
             throw std::runtime_error(UNKNOWN_SIGNAL_ERROR);

@@ -28,6 +28,9 @@ private:
     inline static sf::Texture zombie {};
     inline static sf::Texture skeleton {};
     inline static sf::Texture trapdoor {};
+    inline static sf::Texture protein {};
+    inline static sf::Texture apple {};
+    inline static sf::Texture knife {};
 
     static void __attribute__((constructor)) load_images();
 
@@ -38,11 +41,15 @@ private:
             default_window_height = 900;
 
     int m_window_width, m_window_height;
+
+    int m_field_id;
     field_s_ptr m_field_p;
 
     sf::RenderWindow* m_window;
     bool m_fullscreen = false;
     geo::i_point prev_size;
+
+    void create_field();
 
     void create_window();
     void delete_window();
@@ -54,10 +61,12 @@ private:
     void display();
     void refresh();
 
+    sf::Color health_color(float percentage);
+
 public:
 
     sfml_adapter(
-            field_s_ptr field_p,
+            int field_id,
             int window_width = default_window_width,
             int window_height = default_window_height);
 

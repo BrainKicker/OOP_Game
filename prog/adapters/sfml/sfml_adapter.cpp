@@ -7,6 +7,13 @@ void __attribute__((constructor)) sfml_adapter::load_images() {
     zombie.loadFromFile("../assets/images/Zombie.png");
     skeleton.loadFromFile("../assets/images/Skeleton.png");
     trapdoor.loadFromFile("../assets/images/Trapdoor.png");
+    protein.loadFromFile("../assets/images/Protein.png");
+    apple.loadFromFile("../assets/images/Apple.png");
+    knife.loadFromFile("../assets/images/Knife.png");
+}
+
+void sfml_adapter::create_field() {
+    m_field_p = field_s_ptr(new field(m_field_id));
 }
 
 void sfml_adapter::create_window() {
@@ -55,6 +62,9 @@ void sfml_adapter::handle_event(const sf::Event& event) {
                 case sf::Keyboard::Enter:
                     m_field_p->send_sygnal(sygnal::STEP);
                     break;
+                case sf::Keyboard::R:
+                    m_field_p->send_sygnal(sygnal::RESTART);
+                    break;
                 case sf::Keyboard::F11:
                     if (m_fullscreen) {
                         m_window->create(sf::VideoMode(prev_size.first, prev_size.second), window_name);
@@ -63,6 +73,9 @@ void sfml_adapter::handle_event(const sf::Event& event) {
                         m_window->create(sf::VideoMode(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height), window_name, sf::Style::Fullscreen);
                     }
                     m_fullscreen = !m_fullscreen;
+                    break;
+                case sf::Keyboard::Escape:
+                    m_window->close();
                     break;
                 default:
                     break;
@@ -164,6 +177,27 @@ void sfml_adapter::draw() {
         texture.draw(im_exit);
     }
 
+    // draw artifacts
+    for (const artifact* art : m_field_p->get_artifacts()) {
+        sf::Sprite im_artifact;
+        switch (art->id()) {
+            case artifact::PROTEIN:
+                im_artifact.setTexture(protein);
+                break;
+            case artifact::APPLE:
+                im_artifact.setTexture(apple);
+                break;
+            case artifact::KNIFE:
+                im_artifact.setTexture(knife);
+                break;
+            default:
+                break;
+        }
+        im_artifact.setPosition(border_width + art->coords().first * cell_width, border_width + art->coords().second * cell_height);
+        im_artifact.setScale(cell_width / im_artifact.getLocalBounds().width, cell_height / im_artifact.getLocalBounds().height);
+        texture.draw(im_artifact);
+    }
+
     // draw enemies
     for (const enemy* en : m_field_p->get_enemies()) {
         sf::Sprite im_enemy;
@@ -178,6 +212,13 @@ void sfml_adapter::draw() {
         im_enemy.setPosition(border_width + en->coords().first * cell_width, border_width + en->coords().second * cell_height);
         im_enemy.setScale(cell_width / im_enemy.getLocalBounds().width, cell_height / im_enemy.getLocalBounds().height);
         texture.draw(im_enemy);
+
+        sf::RectangleShape health_bar;
+        float health_percent = ((float) en->hp()) / ((float) en->max_hp());
+        health_bar.setFillColor(health_color(health_percent));
+        health_bar.setPosition(border_width + en->coords().first * cell_width, border_width + (en->coords().second + 1) * cell_height - 0.05f * cell_height);
+        health_bar.setSize({ cell_width * health_percent, 0.05f * cell_height });
+        texture.draw(health_bar);
     }
 
     // draw player
@@ -187,6 +228,13 @@ void sfml_adapter::draw() {
         im_player.setPosition(border_width + m_field_p->get_player().coords().first * cell_width, border_width + m_field_p->get_player().coords().second * cell_height);
         im_player.setScale(cell_width / im_player.getLocalBounds().width, cell_height / im_player.getLocalBounds().height);
         texture.draw(im_player);
+
+        sf::RectangleShape health_bar;
+        float health_percent = ((float) m_field_p->get_player().hp()) / ((float) m_field_p->get_player().max_hp());
+        health_bar.setFillColor(health_color(health_percent));
+        health_bar.setPosition(border_width + m_field_p->get_player().coords().first * cell_width, border_width + (m_field_p->get_player().coords().second + 1) * cell_height - 0.05f * cell_height);
+        health_bar.setSize({ cell_width * health_percent, 0.05f * cell_height });
+        texture.draw(health_bar);
     }
 
     texture.display();
@@ -215,11 +263,23 @@ void sfml_adapter::refresh() {
     display();
 }
 
+sf::Color sfml_adapter::health_color(float percentage) {
+    static sf::Color low = sf::Color::Red;
+    static sf::Color high = sf::Color::Green;
+    return {
+        (sf::Uint8) (low.r + (high.r - low.r) * percentage),
+        (sf::Uint8) (low.g + (high.g - low.g) * percentage),
+        (sf::Uint8) (low.b + (high.b - low.b) * percentage)
+    };
+}
+
 sfml_adapter::sfml_adapter(
-        sfml_adapter::field_s_ptr field_p,
+        int field_id,
         int window_width,
         int window_height
-) : m_field_p(field_p), m_window_width(window_width), m_window_height(window_height), m_window(nullptr) {}
+) : m_field_id(field_id), m_window_width(window_width), m_window_height(window_height), m_window(nullptr) {
+    create_field();
+}
 
 sfml_adapter::~sfml_adapter() {
     delete_window();

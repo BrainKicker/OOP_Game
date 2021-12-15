@@ -11,7 +11,7 @@
 
 int main() {
 
-    sfml_adapter adapter(std::shared_ptr<field>(new field(1)));
+    sfml_adapter adapter(3);
     adapter.start();
 
 //    character c;
