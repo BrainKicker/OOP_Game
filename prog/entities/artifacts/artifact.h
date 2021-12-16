@@ -19,6 +19,7 @@ public:
     enum artifact_id {
         PROTEIN = 0,
         APPLE,
+        GOLDEM_APPLE,
         KNIFE,
 
         COUNT

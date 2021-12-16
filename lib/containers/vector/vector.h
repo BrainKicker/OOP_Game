@@ -57,6 +57,7 @@ public:
     void remove(int index);
 
     int size() const;
+    int capacity() const;
     bool empty() const;
 
     vector<T>& operator=(const std::initializer_list<T>& initializerList);
@@ -93,9 +94,7 @@ public:
 
 template <typename T>
 void vector<T>::__copy(const vector<T>& other) {
-    m_size = other.m_size;
-    m_capacity = other.m_capacity;
-    m_arr = new T[m_capacity];
+    resize(other.size());
     for (int i = 0; i < m_size; ++i)
         m_arr[i] = other.m_arr[i];
 }
@@ -114,6 +113,7 @@ template <typename T>
 void vector<T>::__free() {
     delete[] m_arr;
     m_arr = nullptr;
+    m_size = m_capacity = 0;
 }
 
 template<typename T>
@@ -135,8 +135,8 @@ template <typename T>
 vector<T>::vector() : vector<T>(initial_capacity) {}
 
 template <typename T>
-vector<T>::vector(int n) : m_size(0), m_capacity(n) {
-    m_arr = new T[n];
+vector<T>::vector(int n) {
+    reserve(n);
 }
 
 template <typename T>
@@ -161,8 +161,10 @@ vector<T>::~vector() {
 
 template <typename T>
 void vector<T>::resize(int n) {
-    if (n > m_capacity)
+    if (n > m_size) {
         reserve(n);
+        m_size = n;
+    }
     while (m_size > n)
         remove(m_size - 1);
 }
@@ -233,15 +235,18 @@ int vector<T>::size() const {
 }
 
 template <typename T>
+int vector<T>::capacity() const {
+    return m_capacity;
+}
+
+template <typename T>
 bool vector<T>::empty() const {
     return size() == 0;
 }
 
 template <typename T>
 vector<T>& vector<T>::operator=(const std::initializer_list<T>& initializerList) {
-    __free();
-    m_size = m_capacity = initializerList.size();
-    m_arr = new T[m_capacity];
+    resize(initializerList.size());
     auto iter = initializerList.begin();
     for (int i = 0; i < m_size; ++i, ++iter)
         m_arr[i] = *iter;
@@ -251,7 +256,6 @@ vector<T>& vector<T>::operator=(const std::initializer_list<T>& initializerList)
 template <typename T>
 vector<T>& vector<T>::operator=(const vector<T>& other) {
     if (this != &other) {
-        __free();
         __copy(other);
     }
     return *this;
@@ -260,7 +264,6 @@ vector<T>& vector<T>::operator=(const vector<T>& other) {
 template <typename T>
 vector<T>& vector<T>::operator=(vector<T>&& other) {
     if (this != &other) {
-        __free();
         __move(std::move(other));
     }
     return *this;

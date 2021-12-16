@@ -3,12 +3,16 @@
 void __attribute__((constructor)) sfml_adapter::load_images() {
     wall.loadFromFile("../assets/images/Wall.png");
     grass.loadFromFile("../assets/images/Grass.png");
-    player.loadFromFile("../assets/images/Player.png");
-    zombie.loadFromFile("../assets/images/Zombie.png");
-    skeleton.loadFromFile("../assets/images/Skeleton.png");
+//    player.loadFromFile("../assets/images/Player.png");
+//    zombie.loadFromFile("../assets/images/Zombie.png");
+//    skeleton.loadFromFile("../assets/images/Skeleton.png");
+    player.loadFromFile("../assets/images/Player_with_hands.png");
+    zombie.loadFromFile("../assets/images/Zombie_with_hands.png");
+    skeleton.loadFromFile("../assets/images/Skeleton_with_hands.png");
     trapdoor.loadFromFile("../assets/images/Trapdoor.png");
     protein.loadFromFile("../assets/images/Protein.png");
     apple.loadFromFile("../assets/images/Apple.png");
+    golden_apple.loadFromFile("../assets/images/Golden_Apple.png");
     knife.loadFromFile("../assets/images/Knife.png");
 }
 
@@ -180,6 +184,9 @@ void sfml_adapter::draw() {
                 break;
             case artifact::APPLE:
                 im_artifact.setTexture(apple);
+                break;
+            case artifact::GOLDEM_APPLE:
+                im_artifact.setTexture(golden_apple);
                 break;
             case artifact::KNIFE:
                 im_artifact.setTexture(knife);

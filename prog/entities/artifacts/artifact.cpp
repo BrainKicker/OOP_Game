@@ -7,6 +7,8 @@ const vector<artifact::artifact_info> artifact::artifact_infos = {
                 "PROTEIN",
                 0,
                 [](character* ch) {
+                    if (ch->dead())
+                        return;
                     static const int gain = 20;
                     ch->m_max_hp += gain;
                     if (ch->m_hp > 0)
@@ -14,6 +16,8 @@ const vector<artifact::artifact_info> artifact::artifact_infos = {
                     ch->check_hp();
                 },
                 [](character* ch) {
+                    if (ch->dead())
+                        return;
                     static const int gain = 20;
                     ch->m_max_hp -= gain;
                     ch->m_hp -= gain;
@@ -25,19 +29,35 @@ const vector<artifact::artifact_info> artifact::artifact_infos = {
                 "APPLE",
                 1,
                 [](character* ch) {
+                    if (ch->dead())
+                        return;
                     static const int gain = 10;
                     ch->m_hp += gain;
                     ch->check_hp();
                 },
                 [](character* ch) {
+                    if (ch->dead())
+                        return;
                     static const int gain = 10;
                     ch->m_hp -= gain;
                     ch->check_hp();
                 }
         },
         {
-                "KNIFE",
+                "GOLDEN APPLE",
                 2,
+                [](character* ch) {
+                    if (ch->dead())
+                        return;
+                    ch->m_hp = ch->max_hp();
+                },
+                [](character* ch) {
+                    // do nothing
+                }
+        },
+        {
+                "KNIFE",
+                3,
                 [](character* ch) {
                     static const int gain = 10;
                     ch->m_damage += gain;

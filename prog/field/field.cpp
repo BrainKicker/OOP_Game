@@ -92,6 +92,7 @@ const vector<field::field_template> field::field_templates = {
             [](field& f) {
                 for (artifact* e : {
                         new artifact(artifact::PROTEIN, { 1, 5 }),
+                        new artifact(artifact::APPLE, { 6, 1 }),
                         new artifact(artifact::KNIFE, { 6, 6 })
                 }) {
                     f.add_artifact(e);
@@ -125,7 +126,52 @@ const vector<field::field_template> field::field_templates = {
             [](field& f) {
                 for (artifact* e : {
                         new artifact(artifact::APPLE, { 1, 5 }),
+                        new artifact(artifact::GOLDEM_APPLE, { 9, 4 }),
                         new artifact(artifact::KNIFE, { 6, 6 })
+                }) {
+                    f.add_artifact(e);
+                }
+            }
+        },
+        {
+            4,
+                15, 15,
+                { 0, 14 }, { 14, 0 },
+                {
+                        "#  #           ",
+                        "  #         #  ",
+                        " #  ###### # # ",
+                        "   #      #  # ",
+                        "  #  ####  #   ",
+                        " #  #    # #   ",
+                        "   #  ## # #   ",
+                        "   # #   # #   ",
+                        "   # # ##  #   ",
+                        "   # #    #  # ",
+                        "   #  ####  #  ",
+                        " #  #      #   ",
+                        " # # ######  # ",
+                        "  #         #  ",
+                        "           #  #"
+                },
+            [](field& f) {
+                for (enemy* e : {
+                        new enemy(enemy::ZOMBIE, { 13, 0 }),
+                        new enemy(enemy::ZOMBIE, { 5, 13 }),
+                        new enemy(enemy::SKELETON, { 7, 0 }),
+                        new enemy(enemy::SKELETON, { 12, 14 })
+                }) {
+                    f.add_enemy(e);
+                }
+            },
+            [](field& f) {
+                for (artifact* e : {
+                        new artifact(artifact::PROTEIN, { 6, 8 }),
+                        new artifact(artifact::PROTEIN, { 8, 6 }),
+                        new artifact(artifact::APPLE, { 14, 1 }),
+                        new artifact(artifact::GOLDEM_APPLE, { 7, 7 }),
+                        new artifact(artifact::KNIFE, { 6, 7 }),
+                        new artifact(artifact::KNIFE, { 8, 7 })
                 }) {
                     f.add_artifact(e);
                 }

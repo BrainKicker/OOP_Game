@@ -11,7 +11,7 @@ public:
     enum action_type {
         MOVE,
         ATTACK,
-        TRY_TO_MOVE_ELSE_ATTACK,
+        TRY_TO_MOVE_ELSE_ATTACK
     };
 
     action_type m_type;

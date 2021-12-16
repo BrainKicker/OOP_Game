@@ -31,6 +31,7 @@ private:
     inline static sf::Texture trapdoor {};
     inline static sf::Texture protein {};
     inline static sf::Texture apple {};
+    inline static sf::Texture golden_apple {};
     inline static sf::Texture knife {};
 
     static void __attribute__((constructor)) load_images();
