@@ -138,28 +138,29 @@ const vector<field::field_template> field::field_templates = {
                 15, 15,
                 { 0, 14 }, { 14, 0 },
                 {
-                        "#  #           ",
-                        "  #         #  ",
+                        "#  #   #       ",
+                        "  #  #      #  ",
                         " #  ###### # # ",
                         "   #      #  # ",
                         "  #  ####  #   ",
-                        " #  #    # #   ",
-                        "   #  ## # #   ",
-                        "   # #   # #   ",
-                        "   # # ##  #   ",
-                        "   # #    #  # ",
+                        " #  #    # #  #",
+                        "   #  ## # #  #",
+                        "#  # #   # #  #",
+                        "#  # # ##  #   ",
+                        "#  # #    #  # ",
                         "   #  ####  #  ",
                         " #  #      #   ",
                         " # # ######  # ",
-                        "  #         #  ",
-                        "           #  #"
+                        "  #      #  #  ",
+                        "       #   #  #"
                 },
             [](field& f) {
                 for (enemy* e : {
                         new enemy(enemy::ZOMBIE, { 13, 0 }),
                         new enemy(enemy::ZOMBIE, { 5, 13 }),
-                        new enemy(enemy::SKELETON, { 7, 0 }),
-                        new enemy(enemy::SKELETON, { 12, 14 })
+                        new enemy(enemy::SKELETON, { 6, 0 }),
+                        new enemy(enemy::SKELETON, { 12, 14 }),
+                        new enemy(enemy::SKELETON, { 10, 8 })
                 }) {
                     f.add_enemy(e);
                 }
