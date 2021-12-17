@@ -46,7 +46,7 @@ const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const 
                 } else if (player_enemy_coords_diff > 0 /* x > y */) {
                     return std::abs(player_coords.first - p1.second) < std::abs(player_coords.first - p2.second);
                 } else /* x == y */ {
-                    return (std::rand() & 1) == 0;
+                    return std::rand() < RAND_MAX / 2;
                 }
             }
     );
