@@ -51,6 +51,12 @@ const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const 
             }
     );
 
+    for (auto iter = neighbors.begin(); iter != neighbors.end(); ++iter) {
+        if (f.m_cells[(*iter).first][(*iter).second]->get_entity_type() != en.get_entity_type()) {
+            return action(action::TRY_TO_MOVE_ELSE_ATTACK, *iter);
+        }
+    }
+
     return action(action::TRY_TO_MOVE_ELSE_ATTACK, neighbors[0]);
 };
 
