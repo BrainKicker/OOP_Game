@@ -9,6 +9,7 @@ class action {
 public:
 
     enum action_type {
+        DO_NOTHING,
         MOVE,
         ATTACK,
         TRY_TO_MOVE_ELSE_ATTACK

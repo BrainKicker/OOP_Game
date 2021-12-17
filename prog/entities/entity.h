@@ -24,7 +24,7 @@ protected:
 
 public:
 
-    entity_type type();
+    entity_type get_entity_type() const;
 
     geo::i_point& coords();
     const geo::i_point& coords() const;

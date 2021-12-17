@@ -34,6 +34,7 @@ class field {
 public:
 
     friend class enemy;
+    friend class sfml_adapter;
 
     using field_changer = std::function<void(field&)>;
 
@@ -52,6 +53,8 @@ public:
 
     static const vector<field_template> field_templates;
 
+    static const int distance_unvisited = INT32_MAX; // must be big!!!
+
 private:
 
     inline static const char *const UNKNOWN_SIGNAL_ERROR = "Unknown signal error.";
@@ -62,6 +65,7 @@ private:
     geo::i_point m_entry, m_exit;
     matrix<cell*> m_cells;
     matrix<direction> m_directions;
+    matrix<int> m_distances;
 
     player* m_player;
     vector<enemy*> m_enemies;
@@ -94,8 +98,8 @@ public:
 
     void send_sygnal(sygnal signal);
 
-    int width();
-    int height();
+    int width() const;
+    int height() const;
 
     cell::cell_type get_cell_type(int x, int y) const;
 

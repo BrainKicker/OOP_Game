@@ -11,7 +11,9 @@
 
 int main() {
 
-    sfml_adapter adapter(4);
+    std::srand(std::time(nullptr));
+
+    sfml_adapter adapter(5);
     adapter.start();
 
 //    character c;

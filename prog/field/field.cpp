@@ -177,6 +177,57 @@ const vector<field::field_template> field::field_templates = {
                     f.add_artifact(e);
                 }
             }
+        },
+        {
+            5,
+                27, 15,
+                { 0, 14 }, { 26, 0 },
+                {
+                        "    ###      #     # #     ",
+                        "##            #   #        ",
+                        "# #    # #       ##     #  ",
+                        "       ###   #         #  #",
+                        "  #             #       #  ",
+                        "   #    ##     ###         ",
+                        "    #    #  #   #     #    ",
+                        "  #   #  #           ##   #",
+                        "  #      ###    #          ",
+                        "                   #    ## ",
+                        "   #   #    #           ## ",
+                        "#      ##   #   ##   #     ",
+                        "            #  ###  #   #  ",
+                        "   ##    #       #      #  ",
+                        "         #             ##  "
+                },
+            [](field& f) {
+                for (enemy* e : {
+                        new enemy(enemy::ZOMBIE, { 0, 0 }),
+                        new enemy(enemy::ZOMBIE, { 25, 0 }),
+                        new enemy(enemy::ZOMBIE, { 26, 1 }),
+                        new enemy(enemy::ZOMBIE, { 26, 14 }),
+                        new enemy(enemy::ZOMBIE, { 13, 7 }),
+                        new enemy(enemy::ZOMBIE, { 12, 0 }),
+                        new enemy(enemy::SKELETON, { 8, 2 }),
+                        new enemy(enemy::SKELETON, { 15, 14 }),
+                        new enemy(enemy::SKELETON, { 20, 5 }),
+                        new enemy(enemy::SKELETON, { 6, 10 }),
+                        new enemy(enemy::SKELETON, { 24, 6 })
+                }) {
+                    f.add_enemy(e);
+                }
+            },
+            [](field& f) {
+                for (artifact* e : {
+                        new artifact(artifact::PROTEIN, { 0, 13 }),
+                        new artifact(artifact::PROTEIN, { 1, 12 }),
+                        new artifact(artifact::PROTEIN, { 2, 11 }),
+                        new artifact(artifact::KNIFE, { 1, 14 }),
+                        new artifact(artifact::KNIFE, { 2, 13 }),
+                        new artifact(artifact::KNIFE, { 3, 12 })
+                }) {
+                    f.add_artifact(e);
+                }
+            }
         }
 };
 
@@ -186,44 +237,30 @@ void field::mark_directions() {
     q.push(m_player->coords());
     for (int x = 0; x < width(); ++x)
         for (int y = 0; y < height(); ++y)
-            m_directions[x][y] = direction::UNDEFINED;
-    m_directions[m_player->coords().first][m_player->coords().second] = direction::NONE;
+            m_distances[x][y] = distance_unvisited;
+    m_distances[m_player->coords().first][m_player->coords().second] = 0;
 
-    vector<pair<geo::i_point,direction>> neighbors;
+    int cur_distance = 1;
 
     while (!q.empty()) {
         geo::i_point cur = q.pop();
-        neighbors.add({ { cur.first - 1, cur.second }, direction::RIGHT });
-        neighbors.add({ { cur.first, cur.second - 1 }, direction::DOWN });
-        neighbors.add({ { cur.first + 1, cur.second }, direction::LEFT });
-        neighbors.add({ { cur.first, cur.second + 1 }, direction::UP });
-        if (cur.first - 1 >= 0 && cur.first - 1 < width())
-            if (cur.second >= 0 && cur.second < height())
-                if (m_cells[cur.first - 1][cur.second]->type() != cell::WALL)
-                    neighbors.add({ { cur.first - 1, cur.second + 1 }, direction::UP });
-        if (cur.first >= 0 && cur.first < width())
-            if (cur.second - 1 >= 0 && cur.second - 1 < height())
-                if (m_cells[cur.first][cur.second - 1]->type() != cell::WALL)
-                    neighbors.add({ { cur.first - 1, cur.second - 1 }, direction::RIGHT });
-        if (cur.first + 1 >= 0 && cur.first + 1 < width())
-            if (cur.second >= 0 && cur.second < height())
-                if (m_cells[cur.first + 1][cur.second]->type() != cell::WALL)
-                    neighbors.add({ { cur.first + 1, cur.second - 1 }, direction::DOWN });
-        if (cur.first >= 0 && cur.first < width())
-            if (cur.second + 1 >= 0 && cur.second + 1 < height())
-                if (m_cells[cur.first][cur.second + 1]->type() != cell::WALL)
-                    neighbors.add({ { cur.first + 1, cur.second + 1 }, direction::LEFT });
+        std::initializer_list<geo::i_point> neighbors = {
+                { cur.first - 1, cur.second },
+                { cur.first, cur.second - 1 },
+                { cur.first + 1, cur.second },
+                { cur.first, cur.second + 1 }
+        };
         for (const auto& n : neighbors) {
-            if (n.first.first >= 0 && n.first.first < width() && n.first.second >= 0 && n.first.second < height()) {
-                if (m_cells[n.first.first][n.first.second]->type() != cell::WALL) {
-                    if (m_directions[n.first.first][n.first.second] == direction::UNDEFINED) {
-                        m_directions[n.first.first][n.first.second] = n.second;
-                        q.push(n.first);
+            if (n.first >= 0 && n.first < width() && n.second >= 0 && n.second < height()) {
+                if (m_cells[n.first][n.second]->type() != cell::WALL) {
+                    if (m_distances[n.first][n.second] == distance_unvisited) {
+                        m_distances[n.first][n.second] = cur_distance;
+                        q.push(n);
                     }
                 }
             }
         }
-        neighbors.resize(0);
+        ++cur_distance;
     }
 }
 
@@ -235,6 +272,9 @@ void field::move_character(character* c, geo::i_point coords) {
 }
 
 void field::handle_character_action(character* c, action act) {
+
+    if (act.m_type == action::DO_NOTHING)
+        return;
 
     geo::i_point next_coords;
 
@@ -276,7 +316,7 @@ void field::handle_character_action(character* c, action act) {
         case action::MOVE:
             if (ent == nullptr) {
                 move_character(c, next_coords);
-            } else if (ent->type() == entity::ARTIFACT) {
+            } else if (ent->get_entity_type() == entity::ARTIFACT) {
                 c->get_artifact(remove_artifact((artifact*) ent));
                 cel->set_entity(nullptr);
                 move_character(c, next_coords);
@@ -286,10 +326,10 @@ void field::handle_character_action(character* c, action act) {
             if (ent == nullptr) {
                 break;
             } else {
-                switch (ent->type()) {
+                switch (ent->get_entity_type()) {
                     case entity::PLAYER:
                     case entity::ENEMY:
-                        if (c->type() != ent->type() || act.m_friendly_fire) {
+                        if (c->get_entity_type() != ent->get_entity_type() || act.m_friendly_fire) {
                             c->attack((character*)ent);
                             check_if_character_dead((character*)ent);
                         }
@@ -303,10 +343,10 @@ void field::handle_character_action(character* c, action act) {
             if (ent == nullptr) {
                 move_character(c, next_coords);
             } else {
-                switch (ent->type()) {
+                switch (ent->get_entity_type()) {
                     case entity::PLAYER:
                     case entity::ENEMY:
-                        if (c->type() != ent->type() || act.m_friendly_fire) {
+                        if (c->get_entity_type() != ent->get_entity_type() || act.m_friendly_fire) {
                             c->attack((character*)ent);
                             check_if_character_dead((character*)ent);
                         }
@@ -320,6 +360,8 @@ void field::handle_character_action(character* c, action act) {
                         break;
                 }
             }
+            break;
+        default:
             break;
     }
 }
@@ -339,7 +381,7 @@ void field::check_if_character_dead(character* c) {
     if (c->dead()) {
         if (c == m_player) {
             m_game_condition = game_condition::LOSE;
-        } else if (c->type() == entity::ENEMY) {
+        } else if (c->get_entity_type() == entity::ENEMY) {
             delete_enemy((enemy*)c);
         }
     }
@@ -383,9 +425,9 @@ void field::clear() {
     m_cells[m_player->coords().first][m_player->coords().second]->set_entity(nullptr);
     delete m_player;
     while (!m_enemies.empty())
-        delete_enemy(0);
+        delete_enemy(m_enemies.size() - 1);
     while (!m_artifacts.empty())
-        delete_artifact(0);
+        delete_artifact(m_artifacts.size() - 1);
     for (int x = 0; x < width(); ++x)
         for (int y = 0; y < height(); ++y)
             delete m_cells[x][y];
@@ -394,7 +436,7 @@ void field::clear() {
 field::field(int id)
     : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
     m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
-    m_cells(m_width, m_height), m_directions(m_width, m_height),
+    m_cells(m_width, m_height), m_directions(m_width, m_height), m_distances(m_width, m_height),
     m_enemies(), m_artifacts() {
     load();
 }
@@ -436,11 +478,11 @@ void field::send_sygnal(sygnal signal) {
     }
 }
 
-int field::width() {
+int field::width() const {
     return m_width;
 }
 
-int field::height() {
+int field::height() const {
     return m_height;
 }
 

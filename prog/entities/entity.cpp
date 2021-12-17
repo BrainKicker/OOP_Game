@@ -2,7 +2,7 @@
 
 entity::entity(entity_type type, geo::i_point coords) : m_type(type), m_coords(coords) {}
 
-entity::entity_type entity::type() {
+entity::entity_type entity::get_entity_type() const {
     return m_type;
 }
 
