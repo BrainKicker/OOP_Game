@@ -64,8 +64,7 @@ private:
     int m_width, m_height;
     geo::i_point m_entry, m_exit;
     matrix<cell*> m_cells;
-    matrix<direction> m_directions;
-    matrix<int> m_distances;
+    matrix<int> m_distances, m_distances_throw_enemies;
 
     player* m_player;
     vector<enemy*> m_enemies;
@@ -75,7 +74,9 @@ private:
 
     game_condition m_game_condition = game_condition::RUNNING;
 
-    void mark_directions();
+    vector<geo::i_point> get_neighbors(geo::i_point coords) const;
+
+    void evaluate_distances();
 
     void move_character(character* c, geo::i_point coords);
 

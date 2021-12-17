@@ -22,6 +22,7 @@ private:
     inline static const int s_max_border_width = 30;
     inline static const float s_border_ratio = 0.05;
     inline static const sf::Color s_border_color = sf::Color( 17, 37, 26);
+    inline static sf::Font font {};
 
     inline static sf::Texture wall {};
     inline static sf::Texture grass {};

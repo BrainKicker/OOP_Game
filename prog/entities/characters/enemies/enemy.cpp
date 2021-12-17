@@ -5,20 +5,30 @@
 
 const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const field& f) -> action {
 
-    vector<geo::i_point> neighbors (4);
+    class comp {
+        const enemy& m_en;
+        const field& m_field;
+        const matrix<int>& m_distances;
+    public:
+        comp(const enemy& en, const field& f, const matrix<int>& distances) : m_en(en), m_field(f), m_distances(distances) {}
+        bool operator()(const geo::i_point& p1, const geo::i_point& p2) {
+            int dist_diff = m_distances[p1.first][p1.second] - m_distances[p2.first][p2.second];
+            if (dist_diff != 0)
+                return dist_diff < 0;
+            const auto& player_coords = m_field.get_player().coords();
+            const int player_enemy_coords_diff =
+                    std::abs(player_coords.first - m_en.coords().first) - abs(player_coords.second - m_en.coords().second);
+            if (player_enemy_coords_diff < 0 /* x < y */) {
+                return std::abs(player_coords.first - p1.first) < std::abs(player_coords.first - p2.first);
+            } else if (player_enemy_coords_diff > 0 /* x > y */) {
+                return std::abs(player_coords.first - p1.second) < std::abs(player_coords.first - p2.second);
+            } else /* x == y */ {
+                return std::rand() < RAND_MAX / 2;
+            }
+        }
+    };
 
-    if (en.coords().first - 1 >= 0 && en.coords().first - 1 < f.width())
-        if (en.coords().second >= 0 && en.coords().second < f.height())
-            neighbors.add({ en.coords().first - 1, en.coords().second });
-    if (en.coords().first >= 0 && en.coords().first < f.width())
-        if (en.coords().second - 1 >= 0 && en.coords().second - 1 < f.height())
-            neighbors.add({ en.coords().first, en.coords().second - 1 });
-    if (en.coords().first + 1 >= 0 && en.coords().first + 1 < f.width())
-        if (en.coords().second >= 0 && en.coords().second < f.height())
-            neighbors.add({ en.coords().first + 1, en.coords().second });
-    if (en.coords().first >= 0 && en.coords().first < f.width())
-        if (en.coords().second + 1 >= 0 && en.coords().second + 1 < f.height())
-            neighbors.add({ en.coords().first, en.coords().second + 1 });
+    vector<geo::i_point> neighbors = f.get_neighbors(en.coords());
 
     for (int i = 0; i < neighbors.size();) {
         if (f.m_distances[neighbors[i].first][neighbors[i].second] == field::distance_unvisited) {
@@ -29,32 +39,23 @@ const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const 
     }
 
     if (neighbors.empty()) {
-        return action(action::DO_NOTHING, { -1, -1 });
-    }
 
-    heapsort(
-            neighbors.begin(),
-            neighbors.end(),
-            [&](const auto& p1, const auto& p2) {
-                int dist_diff = f.m_distances[p1.first][p1.second] - f.m_distances[p2.first][p2.second];
-                if (dist_diff != 0)
-                    return dist_diff < 0;
-                const auto& player_coords = f.get_player().coords();
-                const int player_enemy_coords_diff = std::abs(player_coords.first - en.coords().first) - abs(player_coords.second - en.coords().second);
-                if (player_enemy_coords_diff < 0 /* x < y */) {
-                    return std::abs(player_coords.first - p1.first) < std::abs(player_coords.first - p2.first);
-                } else if (player_enemy_coords_diff > 0 /* x > y */) {
-                    return std::abs(player_coords.first - p1.second) < std::abs(player_coords.first - p2.second);
-                } else /* x == y */ {
-                    return std::rand() < RAND_MAX / 2;
-                }
+        neighbors = f.get_neighbors(en.coords());
+
+        for (int i = 0; i < neighbors.size();) {
+            if (f.m_distances_throw_enemies[neighbors[i].first][neighbors[i].second] == field::distance_unvisited) {
+                neighbors.remove(i);
+            } else {
+                ++i;
             }
-    );
-
-    for (auto iter = neighbors.begin(); iter != neighbors.end(); ++iter) {
-        if (f.m_cells[(*iter).first][(*iter).second]->get_entity_type() != en.get_entity_type()) {
-            return action(action::TRY_TO_MOVE_ELSE_ATTACK, *iter);
         }
+
+        if (neighbors.empty())
+            return action(action::DO_NOTHING, { -1, -1 });
+
+        heapsort(neighbors.begin(), neighbors.end(), comp(en, f, f.m_distances_throw_enemies));
+    } else {
+        heapsort(neighbors.begin(), neighbors.end(), comp(en, f, f.m_distances));
     }
 
     return action(action::TRY_TO_MOVE_ELSE_ATTACK, neighbors[0]);

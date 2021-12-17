@@ -13,7 +13,8 @@ void __attribute__((constructor)) sfml_adapter::load_images() {
     protein.loadFromFile("../assets/images/Protein.png");
     apple.loadFromFile("../assets/images/Apple.png");
     golden_apple.loadFromFile("../assets/images/Golden_Apple.png");
-    knife.loadFromFile("../assets/images/Knife.png");
+    knife.loadFromFile("../assets/images/Knife.png");    font.loadFromFile("../assets/fonts/times-new-roman.ttf");
+
 }
 
 void sfml_adapter::create_field() {

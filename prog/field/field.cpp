@@ -257,15 +257,39 @@ const vector<field::field_template> field::field_templates = {
         }
 };
 
-void field::mark_directions() {
+vector<geo::i_point> field::get_neighbors(geo::i_point coords) const {
+
+    vector<geo::i_point> neighbors (4);
+
+    if (coords.first - 1 >= 0 && coords.first - 1 < width())
+        if (coords.second >= 0 && coords.second < height())
+            neighbors.add({ coords.first - 1, coords.second });
+    if (coords.first >= 0 && coords.first < width())
+        if (coords.second - 1 >= 0 && coords.second - 1 < height())
+            neighbors.add({ coords.first, coords.second - 1 });
+    if (coords.first + 1 >= 0 && coords.first + 1 < width())
+        if (coords.second >= 0 && coords.second < height())
+            neighbors.add({ coords.first + 1, coords.second });
+    if (coords.first >= 0 && coords.first < width())
+        if (coords.second + 1 >= 0 && coords.second + 1 < height())
+            neighbors.add({ coords.first, coords.second + 1 });
+
+    return neighbors;
+}
+
+void field::evaluate_distances() {
 
     queue<pair<geo::i_point,int>> q;
-    q.push({ m_player->coords(), 0 });
-    for (int x = 0; x < width(); ++x)
-        for (int y = 0; y < height(); ++y)
+    for (int x = 0; x < width(); ++x) {
+        for (int y = 0; y < height(); ++y) {
             m_distances[x][y] = distance_unvisited;
+            m_distances_throw_enemies[x][y] = distance_unvisited;
+        }
+    }
     m_distances[m_player->coords().first][m_player->coords().second] = 0;
+    m_distances_throw_enemies[m_player->coords().first][m_player->coords().second] = 0;
 
+    q.push({ m_player->coords(), 0 });
     while (!q.empty()) {
         auto cur = q.pop();
         std::initializer_list<geo::i_point> neighbors = {
@@ -281,8 +305,30 @@ void field::mark_directions() {
                         if (m_distances[n.first][n.second] == distance_unvisited) {
                             int distance = cur.second + 1;
                             m_distances[n.first][n.second] = distance;
-                            q.push({ n, distance });
+                            q.push({n, distance});
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    q.push({ m_player->coords(), 0 });
+    while (!q.empty()) {
+        auto cur = q.pop();
+        std::initializer_list<geo::i_point> neighbors = {
+                { cur.first.first - 1, cur.first.second },
+                { cur.first.first, cur.first.second - 1 },
+                { cur.first.first + 1, cur.first.second },
+                { cur.first.first, cur.first.second + 1 }
+        };
+        for (const auto& n : neighbors) {
+            if (n.first >= 0 && n.first < width() && n.second >= 0 && n.second < height()) {
+                if (m_cells[n.first][n.second]->type() != cell::WALL) {
+                    if (m_distances_throw_enemies[n.first][n.second] == distance_unvisited) {
+                        int distance = cur.second + 1;
+                        m_distances_throw_enemies[n.first][n.second] = distance;
+                        q.push({ n, distance });
                     }
                 }
             }
@@ -395,7 +441,7 @@ void field::handle_character_action(character* c, action act) {
 void field::players_turn() {
     handle_character_action(m_player, { action::TRY_TO_MOVE_ELSE_ATTACK, m_player->dir() });
     if (m_player->dir() != direction::NONE && m_player->dir() != direction::UNDEFINED)
-        mark_directions();
+        evaluate_distances();
 }
 
 void field::enemies_turn() {
@@ -439,7 +485,7 @@ void field::load() {
     field_templates[m_id].artifacts_generator(*this);
 
     move_character(m_player, m_entry);
-    mark_directions();
+    evaluate_distances();
 }
 
 void field::reload() {
@@ -462,7 +508,8 @@ void field::clear() {
 field::field(int id)
     : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
     m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
-    m_cells(m_width, m_height), m_directions(m_width, m_height), m_distances(m_width, m_height),
+    m_cells(m_width, m_height),
+    m_distances(m_width, m_height), m_distances_throw_enemies(m_width, m_height),
     m_enemies(), m_artifacts() {
     load();
 }
