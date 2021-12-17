@@ -6,15 +6,14 @@ void __attribute__((constructor)) sfml_adapter::load_images() {
 //    player.loadFromFile("../assets/images/Player.png");
 //    zombie.loadFromFile("../assets/images/Zombie.png");
 //    skeleton.loadFromFile("../assets/images/Skeleton.png");
-    player.loadFromFile("../assets/images/Player_with_hands.png");
+    player.loadFromFile("../assets/images/Player_with_hands2.png");
     zombie.loadFromFile("../assets/images/Zombie_with_hands.png");
     skeleton.loadFromFile("../assets/images/Skeleton_with_hands.png");
     trapdoor.loadFromFile("../assets/images/Trapdoor.png");
     protein.loadFromFile("../assets/images/Protein.png");
     apple.loadFromFile("../assets/images/Apple.png");
     golden_apple.loadFromFile("../assets/images/Golden_Apple.png");
-    knife.loadFromFile("../assets/images/Knife.png");    font.loadFromFile("../assets/fonts/times-new-roman.ttf");
-
+    knife.loadFromFile("../assets/images/Knife.png");
 }
 
 void sfml_adapter::create_field() {

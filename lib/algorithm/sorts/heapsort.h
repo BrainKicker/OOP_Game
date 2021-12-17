@@ -7,7 +7,7 @@ template <typename Iterator>
 using ValueType = typename std::iterator_traits<Iterator>::value_type;
 
 template <typename Iterator>
-void heapsort(Iterator begin, Iterator end, comparator<ValueType<Iterator>> comp = less<ValueType<Iterator>>) {
+void heapsort(Iterator begin, Iterator end, const comparator<ValueType<Iterator>>& comp = less<ValueType<Iterator>>) {
 
     int size = end - begin;
 

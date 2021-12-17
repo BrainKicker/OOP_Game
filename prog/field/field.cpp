@@ -445,8 +445,10 @@ void field::players_turn() {
 }
 
 void field::enemies_turn() {
-    for (enemy* e : m_enemies)
+    for (enemy* e : m_enemies) {
         handle_character_action(e, e->get_action(*this));
+        evaluate_distances();
+    }
 }
 
 void field::check_if_character_dead(character* c) {
