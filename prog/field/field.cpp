@@ -228,39 +228,65 @@ const vector<field::field_template> field::field_templates = {
                     f.add_artifact(e);
                 }
             }
+        },
+        {
+            1,
+                3, 5,
+                { 0, 4 }, { 2, 4 },
+                {
+                        "             ",
+                        "             ",
+                        "             ",
+                        "             ",
+                        "             ",
+                        "             ",
+                        "             ",
+                        "             "
+                },
+            [](field& f) {
+                for (enemy* e : {
+                        new enemy(enemy::ZOMBIE, { 0, 2 }),
+                        new enemy(enemy::SKELETON, { 0, 3 })
+                }) {
+                    f.add_enemy(e);
+                }
+            },
+            [](field& f) {
+
+            }
         }
 };
 
 void field::mark_directions() {
 
-    queue<geo::i_point> q;
-    q.push(m_player->coords());
+    queue<pair<geo::i_point,int>> q;
+    q.push({ m_player->coords(), 0 });
     for (int x = 0; x < width(); ++x)
         for (int y = 0; y < height(); ++y)
             m_distances[x][y] = distance_unvisited;
     m_distances[m_player->coords().first][m_player->coords().second] = 0;
 
-    int cur_distance = 1;
-
     while (!q.empty()) {
-        geo::i_point cur = q.pop();
+        auto cur = q.pop();
         std::initializer_list<geo::i_point> neighbors = {
-                { cur.first - 1, cur.second },
-                { cur.first, cur.second - 1 },
-                { cur.first + 1, cur.second },
-                { cur.first, cur.second + 1 }
+                { cur.first.first - 1, cur.first.second },
+                { cur.first.first, cur.first.second - 1 },
+                { cur.first.first + 1, cur.first.second },
+                { cur.first.first, cur.first.second + 1 }
         };
         for (const auto& n : neighbors) {
             if (n.first >= 0 && n.first < width() && n.second >= 0 && n.second < height()) {
                 if (m_cells[n.first][n.second]->type() != cell::WALL) {
-                    if (m_distances[n.first][n.second] == distance_unvisited) {
-                        m_distances[n.first][n.second] = cur_distance;
-                        q.push(n);
+                    if (m_cells[n.first][n.second]->get_entity_type() != entity::ENEMY) {
+                        if (m_distances[n.first][n.second] == distance_unvisited) {
+                            int distance = cur.second + 1;
+                            m_distances[n.first][n.second] = distance;
+                            q.push({ n, distance });
+                        }
                     }
                 }
             }
         }
-        ++cur_distance;
     }
 }
 
