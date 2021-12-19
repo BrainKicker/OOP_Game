@@ -8,6 +8,8 @@ class player : public character {
 
     direction m_dir = direction::NONE;
 
+protected:
+
 public:
 
     player(geo::i_point coords = { -1, -1 });

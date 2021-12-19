@@ -6,13 +6,14 @@
 
 #include "lib/containers/string/string.h"
 
+#include "lib/utils/logger/logger.h"
+
 #include "prog/field/field.h"
 #include "prog/adapters/sfml/sfml_adapter.h"
 
 int main() {
 
     std::srand(std::time(nullptr));
-
     sfml_adapter adapter(5);
     adapter.start();
 

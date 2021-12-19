@@ -6,10 +6,6 @@ entity::entity_type entity::get_entity_type() const {
     return m_type;
 }
 
-geo::i_point& entity::coords() {
-    return m_coords;
-}
-
 const geo::i_point& entity::coords() const {
     return m_coords;
 }
