@@ -2,8 +2,9 @@
 #define GAME_ENTITY_H
 
 #include "../geometry/geo.h"
+#include "../../lib/utils/logger/Observable.h"
 
-class entity {
+class entity : public Observable {
 public:
 
     enum entity_type {
@@ -17,14 +18,15 @@ public:
 
 protected:
 
-    entity_type m_type;
     geo::i_point m_coords;
 
-    entity(entity_type type, geo::i_point coords = { -1, -1 });
+    entity(geo::i_point coords = { -1, -1 });
+
+    void print(std::ostream &out) const override;
 
 public:
 
-    entity_type get_entity_type() const;
+    ~entity() override = default;
 
     const geo::i_point& coords() const;
     void set_coords(geo::i_point coords);

@@ -3,8 +3,7 @@
 
 #include <functional>
 
-#include "../../../lib/containers/vector/vector.h"
-#include "../../../lib/utils/data.h"
+#include "../../../lib/containers/vector/Vector.h"
 
 #include "../entity.h"
 
@@ -34,7 +33,7 @@ public:
 
 private:
 
-    static const vector<artifact_info> artifact_infos;
+    static const Vector<artifact_info> artifact_infos;
 
     artifact_id m_id;
 

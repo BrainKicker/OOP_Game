@@ -28,13 +28,17 @@ public:
         strategy m_strategy;
     };
 
-    static const vector<enemy_info> enemy_infos;
+    static const Vector<enemy_info> enemy_infos;
 
 private:
 
     static const strategy default_melee_strategy;
 
     enemy_type m_type;
+
+protected:
+
+    void print(std::ostream &out) const override;
 
 public:
 

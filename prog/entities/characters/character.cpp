@@ -2,8 +2,12 @@
 
 #include "../artifacts/artifact.h"
 
-character::character(entity_type type, geo::i_point coords, int max_hp, int hp, int damage, bool melee)
-: entity(type, coords), m_max_hp(max_hp), m_hp(hp), m_damage(damage), m_melee(melee) {}
+void character::print(std::ostream& out) const {
+    out << "character{ coords=" << coords() << ", max_hp=" << max_hp() << ", hp=" << hp() << ", damage=" << damage() << ", is_melee=" << melee() << ", is_alive=" << alive() << ", artifacts=" << m_artifacts << " }";
+}
+
+character::character(geo::i_point coords, int max_hp, int hp, int damage, bool melee)
+: entity(coords), m_max_hp(max_hp), m_hp(hp), m_damage(damage), m_melee(melee) {}
 
 character::~character() {
     for (artifact* art : m_artifacts)
@@ -62,17 +66,20 @@ bool character::dead() const {
 void character::attack(character* other) {
     other->m_hp -= m_damage;
     other->check_hp();
+    other->notify();
 }
 
 void character::get_artifact(artifact* art) {
     artifact::act(art, this);
     m_artifacts.add(art);
+    notify();
 }
 
 [[nodiscard]] artifact* character::remove_artifact(int index) {
     artifact* art = m_artifacts[index];
     artifact::react(art, this);
     m_artifacts.remove(index);
+    notify();
     return art;
 }
 
@@ -87,6 +94,7 @@ void character::delete_artifact(int index) {
             artifact* art = m_artifacts[i];
             artifact::react(art, this);
             m_artifacts.remove(i);
+            notify();
             return art;
         }
     }

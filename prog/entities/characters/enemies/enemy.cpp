@@ -8,13 +8,19 @@ const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const 
     class comp {
         const enemy& m_en;
         const field& m_field;
-        const matrix<int>& m_distances;
+        const Matrix<int>& m_distances;
     public:
-        comp(const enemy& en, const field& f, const matrix<int>& distances) : m_en(en), m_field(f), m_distances(distances) {}
+        comp(const enemy& en, const field& f, const Matrix<int>& distances) : m_en(en), m_field(f), m_distances(distances) {}
         bool operator()(const geo::i_point& p1, const geo::i_point& p2) {
             int dist_diff = m_distances[p1.first][p1.second] - m_distances[p2.first][p2.second];
             if (dist_diff != 0)
                 return dist_diff < 0;
+            entity* p1_ent = m_field.m_cells[p1.first][p1.second]->get_entity();
+            entity* p2_ent = m_field.m_cells[p2.first][p2.second]->get_entity();
+            if ((p1_ent == nullptr || typeid(*p1_ent) != typeid(enemy)) && p2_ent != nullptr && typeid(*p2_ent) == typeid(enemy))
+                return true;
+            else if (p1_ent != nullptr && typeid(*p1_ent) == typeid(enemy) && (p2_ent == nullptr || typeid(*p2_ent) != typeid(enemy)))
+                return false;
             const auto& player_coords = m_field.get_player().coords();
             const int player_enemy_coords_diff =
                     std::abs(player_coords.first - m_en.coords().first) - abs(player_coords.second - m_en.coords().second);
@@ -28,7 +34,7 @@ const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const 
         }
     };
 
-    vector<geo::i_point> neighbors = f.get_neighbors(en.coords());
+    Vector<geo::i_point> neighbors = f.get_neighbors(en.coords());
 
     for (int i = 0; i < neighbors.size();) {
         if (f.m_distances[neighbors[i].first][neighbors[i].second] == field::distance_unvisited) {
@@ -61,7 +67,7 @@ const enemy::strategy enemy::default_melee_strategy = [](const enemy& en, const 
     return action(action::TRY_TO_MOVE_ELSE_ATTACK, neighbors[0]);
 };
 
-const vector<enemy::enemy_info> enemy::enemy_infos = {
+const Vector<enemy::enemy_info> enemy::enemy_infos = {
         {
             ZOMBIE,
             90,
@@ -80,7 +86,11 @@ const vector<enemy::enemy_info> enemy::enemy_infos = {
         }
 };
 
-enemy::enemy(enemy::enemy_type type, geo::i_point coords) : character(ENEMY, coords) {
+void enemy::print(std::ostream& out) const {
+    out << "enemy{ coords=" << coords() << ", type=" << type() << ", max_hp=" << max_hp() << ", hp=" << hp() << ", damage=" << damage() << ", is_melee=" << melee() << ", is_alive=" << alive() << ", artifacts=" << m_artifacts << " }";
+}
+
+enemy::enemy(enemy::enemy_type type, geo::i_point coords) : character(coords) {
     m_type = type;
     m_max_hp = enemy_infos[m_type].m_max_hp;
     m_hp = enemy_infos[m_type].m_hp;

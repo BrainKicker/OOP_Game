@@ -1,6 +1,10 @@
 #include "player.h"
 
-player::player(geo::i_point coords) : character(PLAYER, coords) {}
+void player::print(std::ostream& out) const {
+    out << "player{ coords=" << coords() << ", max_hp=" << max_hp() << ", hp=" << hp() << ", damage=" << damage() << ", is_melee=" << melee() << ", is_alive=" << alive() << ", artifacts=" << m_artifacts << " }";
+}
+
+player::player(geo::i_point coords) : character(coords) {}
 
 direction player::dir() {
     return m_dir;

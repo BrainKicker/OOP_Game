@@ -1,9 +1,11 @@
 #include "entity.h"
 
-entity::entity(entity_type type, geo::i_point coords) : m_type(type), m_coords(coords) {}
+entity::entity(geo::i_point coords) : m_coords(coords) {
+    notify();
+}
 
-entity::entity_type entity::get_entity_type() const {
-    return m_type;
+void entity::print(std::ostream& out) const {
+    out << "entity{ coords=" << coords() << " }";
 }
 
 const geo::i_point& entity::coords() const {
@@ -12,4 +14,5 @@ const geo::i_point& entity::coords() const {
 
 void entity::set_coords(geo::i_point coords) {
     m_coords = coords;
+    notify();
 }

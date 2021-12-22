@@ -1,7 +1,7 @@
 #ifndef GAME_CHARACTER_H
 #define GAME_CHARACTER_H
 
-#include "../../../lib/containers/vector/vector.h"
+#include "../../../lib/containers/vector/Vector.h"
 
 #include "../entity.h"
 
@@ -21,7 +21,9 @@ protected:
 
     bool m_alive;
 
-    vector<artifact*> m_artifacts {};
+    Vector<artifact*> m_artifacts {};
+
+    void print(std::ostream &out) const override;
 
 public:
 
@@ -33,14 +35,13 @@ public:
             default_initial_melee = true;
 
     character(
-            entity_type type = CHARACTER,
             geo::i_point coords = { -1, -1 },
             int max_hp = default_initial_max_hp,
             int hp = default_initial_hp,
             int damage = default_initial_damage,
             bool melee = default_initial_melee);
 
-    ~character();
+    ~character() override;
 
     void check_max_hp();
     void check_hp();

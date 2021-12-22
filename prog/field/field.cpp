@@ -1,6 +1,6 @@
 #include "field.h"
 
-const vector<field::field_template> field::field_templates = {
+const Vector<field::field_template> field::field_templates = {
         {
             0,
             13, 8,
@@ -257,9 +257,9 @@ const vector<field::field_template> field::field_templates = {
         }
 };
 
-vector<geo::i_point> field::get_neighbors(geo::i_point coords) const {
+Vector<geo::i_point> field::get_neighbors(geo::i_point coords) const {
 
-    vector<geo::i_point> neighbors (4);
+    Vector<geo::i_point> neighbors (4);
 
     if (coords.first - 1 >= 0 && coords.first - 1 < width())
         if (coords.second >= 0 && coords.second < height())
@@ -279,7 +279,7 @@ vector<geo::i_point> field::get_neighbors(geo::i_point coords) const {
 
 void field::evaluate_distances() {
 
-    queue<pair<geo::i_point,int>> q;
+    Queue<Pair<geo::i_point,int>> q;
     for (int x = 0; x < width(); ++x) {
         for (int y = 0; y < height(); ++y) {
             m_distances[x][y] = distance_unvisited;
@@ -301,7 +301,7 @@ void field::evaluate_distances() {
         for (const auto& n : neighbors) {
             if (n.first >= 0 && n.first < width() && n.second >= 0 && n.second < height()) {
                 if (m_cells[n.first][n.second]->type() != cell::WALL) {
-                    if (m_cells[n.first][n.second]->get_entity_type() != entity::ENEMY) {
+                    if (!type_utils::instanceof<enemy>(*m_cells[n.first][n.second]->get_entity())) {
                         if (m_distances[n.first][n.second] == distance_unvisited) {
                             int distance = cur.second + 1;
                             m_distances[n.first][n.second] = distance;
@@ -388,7 +388,7 @@ void field::handle_character_action(character* c, action act) {
         case action::MOVE:
             if (ent == nullptr) {
                 move_character(c, next_coords);
-            } else if (ent->get_entity_type() == entity::ARTIFACT) {
+            } else if (type_utils::instanceof<artifact>(*ent)) {
                 c->get_artifact(remove_artifact((artifact*) ent));
                 cel->set_entity(nullptr);
                 move_character(c, next_coords);
@@ -398,16 +398,11 @@ void field::handle_character_action(character* c, action act) {
             if (ent == nullptr) {
                 break;
             } else {
-                switch (ent->get_entity_type()) {
-                    case entity::PLAYER:
-                    case entity::ENEMY:
-                        if (c->get_entity_type() != ent->get_entity_type() || act.m_friendly_fire) {
-                            c->attack((character*)ent);
-                            check_if_character_dead((character*)ent);
-                        }
-                        break;
-                    default:
-                        break;
+                if (type_utils::instanceof<character>(*ent)) {
+                    if (!type_utils::same_type(*c, *ent) || act.m_friendly_fire) {
+                        c->attack((character*)ent);
+                        check_if_character_dead((character*)ent);
+                    }
                 }
             }
             break;
@@ -415,21 +410,15 @@ void field::handle_character_action(character* c, action act) {
             if (ent == nullptr) {
                 move_character(c, next_coords);
             } else {
-                switch (ent->get_entity_type()) {
-                    case entity::PLAYER:
-                    case entity::ENEMY:
-                        if (c->get_entity_type() != ent->get_entity_type() || act.m_friendly_fire) {
-                            c->attack((character*)ent);
-                            check_if_character_dead((character*)ent);
-                        }
-                        break;
-                    case entity::ARTIFACT:
-                        c->get_artifact(remove_artifact((artifact*) ent));
-                        cel->set_entity(nullptr);
-                        move_character(c, next_coords);
-                        break;
-                    default:
-                        break;
+                if (type_utils::instanceof<character>(*ent)) {
+                    if (!type_utils::same_type(*c, *ent) || act.m_friendly_fire) {
+                        c->attack((character*)ent);
+                        check_if_character_dead((character*)ent);
+                    }
+                } else if (type_utils::instanceof<artifact>(*ent)) {
+                    c->get_artifact(remove_artifact((artifact*) ent));
+                    cel->set_entity(nullptr);
+                    move_character(c, next_coords);
                 }
             }
             break;
@@ -455,7 +444,7 @@ void field::check_if_character_dead(character* c) {
     if (c->dead()) {
         if (c == m_player) {
             m_game_condition = game_condition::LOSE;
-        } else if (c->get_entity_type() == entity::ENEMY) {
+        } else if (type_utils::instanceof<enemy>(*c)) {
             delete_enemy((enemy*)c);
         }
     }
@@ -507,13 +496,21 @@ void field::clear() {
             delete m_cells[x][y];
 }
 
-field::field(int id)
+void field::apply_logger() {
+    m_player->setLogger(m_logger);
+    for (enemy* en : m_enemies)
+        en->setLogger(m_logger);
+}
+
+field::field(int id, std::shared_ptr<Logger> logger)
     : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
     m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
     m_cells(m_width, m_height),
     m_distances(m_width, m_height), m_distances_throw_enemies(m_width, m_height),
-    m_enemies(), m_artifacts() {
+    m_enemies(), m_artifacts(),
+    m_logger(logger) {
     load();
+    apply_logger();
 }
 
 field::~field() {
@@ -569,11 +566,11 @@ const player& field::get_player() const {
     return *m_player;
 }
 
-const vector<enemy*> field::get_enemies() const {
+const Vector<enemy*> field::get_enemies() const {
     return m_enemies;
 }
 
-const vector<artifact*> field::get_artifacts() const {
+const Vector<artifact*> field::get_artifacts() const {
     return m_artifacts;
 }
 
@@ -645,6 +642,15 @@ artifact* field::remove_artifact(artifact* ptr) {
 
 void field::delete_artifact(artifact* ptr) {
     delete remove_artifact(ptr);
+}
+
+std::shared_ptr<Logger> field::get_logger() {
+    return m_logger;
+}
+
+void field::set_logger(std::shared_ptr<Logger> logger) {
+    m_logger = logger;
+    apply_logger();
 }
 
 void field::step() {

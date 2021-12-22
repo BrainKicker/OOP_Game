@@ -1,4 +1,4 @@
-#include "string.h"
+#include "String.h"
 
 std::ostream& operator<<(std::ostream& out, const string& str) {
     for (char c : str)

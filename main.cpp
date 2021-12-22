@@ -1,18 +1,46 @@
 #include <iostream>
+#include <getopt.h>
 
-#include "lib/containers/vector/vector.h"
+#include "lib/containers/vector/Vector.h"
 
-#include "lib/containers/pair/pair.h"
+#include "lib/containers/pair/Pair.h"
 
-#include "lib/containers/string/string.h"
+#include "lib/containers/string/String.h"
 
 #include "prog/field/field.h"
 #include "prog/adapters/sfml/sfml_adapter.h"
 
-int main() {
+int main(int argc, char** argv) {
 
     std::srand(std::time(nullptr));
+
+    const char* short_options = "l::";
+
+    const option long_options[] = {
+            { "log", optional_argument, nullptr, 'l'},
+            {nullptr, 0, nullptr, 0 }
+    };
+
+    std::shared_ptr<Logger> logger;
+
+    int opchar;
+    int option_index;
+
+    while ((opchar = getopt_long_only(argc, argv, short_options, long_options, &option_index)) != -1) {
+        switch (opchar) {
+            case 'l':
+                if (optarg == nullptr)
+                    logger = std::shared_ptr<Logger>(new StreamLogger(std::cout));
+                else
+                    logger = std::shared_ptr<Logger>(new FileLogger(optarg));
+                break;
+            default:
+                break;
+        }
+    }
+
     sfml_adapter adapter(5);
+    adapter.get_field()->set_logger(logger);
     adapter.start();
 
 //    character c;

@@ -8,6 +8,10 @@ class player : public character {
 
     direction m_dir = direction::NONE;
 
+protected:
+
+    void print(std::ostream &out) const override;
+
 public:
 
     player(geo::i_point coords = { -1, -1 });

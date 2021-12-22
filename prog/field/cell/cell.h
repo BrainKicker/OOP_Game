@@ -14,7 +14,6 @@ public:
 private:
 
     cell_type m_type;
-    entity::entity_type m_entity_type;
     entity* m_entity;
 
 public:
@@ -29,7 +28,6 @@ public:
 
     entity*& get_entity();
     const entity *const & get_entity() const;
-    entity::entity_type get_entity_type() const;
     void set_entity(class entity* ent);
 };
 

@@ -1,18 +1,18 @@
 #ifndef CPP_MY_LIB_QUEUE_H
 #define CPP_MY_LIB_QUEUE_H
 
-#include "../list/list.h"
+#include "../list/List.h"
 
 template <typename T>
-class queue {
+class Queue {
 
 protected:
 
-    list<T> m_list;
+    List<T> m_list;
 
 public:
 
-    queue();
+    Queue();
 
     void push(const T& t);
     void push(T&& t);
@@ -29,52 +29,52 @@ public:
 };
 
 template <typename T>
-queue<T>::queue() {}
+Queue<T>::Queue() {}
 
 template <typename T>
-void queue<T>::push(const T& t) {
+void Queue<T>::push(const T& t) {
     m_list.add(t);
 }
 
 template <typename T>
-void queue<T>::push(T&& t) {
+void Queue<T>::push(T&& t) {
     m_list.add(std::move(t));
 }
 
 template <typename T>
-T& queue<T>::front() {
+T& Queue<T>::front() {
     return m_list.first();
 }
 
 template <typename T>
-const T& queue<T>::front() const {
+const T& Queue<T>::front() const {
     return m_list.first();
 }
 
 template <typename T>
-T& queue<T>::back() {
+T& Queue<T>::back() {
     return m_list.last();
 }
 
 template <typename T>
-const T& queue<T>::back() const {
+const T& Queue<T>::back() const {
     return m_list.last();
 }
 
 template <typename T>
-T queue<T>::pop() {
+T Queue<T>::pop() {
     T t = m_list.first();
     m_list.remove_first();
     return t;
 }
 
 template <typename T>
-int queue<T>::size() {
+int Queue<T>::size() {
     return m_list.size();
 }
 
 template <typename T>
-bool queue<T>::empty() {
+bool Queue<T>::empty() {
     return m_list.empty();
 }
 

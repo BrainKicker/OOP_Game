@@ -6,10 +6,10 @@
 #include "../../utils/memory_utils.h"
 
 template <typename T>
-class list {
+class List {
 
     class node {
-        friend class list<T>;
+        friend class List<T>;
         node* m_left;
         node* m_right;
         T m_data;
@@ -26,8 +26,8 @@ class list {
 
 public:
 
-    list();
-    ~list();
+    List();
+    ~List();
 
     void add(const T& t);
     void add(T&& t);
@@ -48,28 +48,28 @@ public:
 };
 
 template <typename T>
-list<T>::node::node(const T& t, node* left, node* right) : m_data(t), m_left(left), m_right(right) {}
+List<T>::node::node(const T& t, node* left, node* right) : m_data(t), m_left(left), m_right(right) {}
 
 template <typename T>
-list<T>::node::node(T&& t, list::node* left, list::node* right) : m_data(std::move(t)), m_left(left), m_right(right) {}
+List<T>::node::node(T&& t, List::node* left, List::node* right) : m_data(std::move(t)), m_left(left), m_right(right) {}
 
 template <typename T>
-void list<T>::assume_not_empty() {
+void List<T>::assume_not_empty() {
     if (empty())
-        throw std::out_of_range("list is empty");
+        throw std::out_of_range("List is empty");
 }
 
 template <typename T>
-list<T>::list() {}
+List<T>::List() {}
 
 template <typename T>
-list<T>::~list() {
+List<T>::~List() {
     while (m_size)
         remove_last();
 }
 
 template <typename T>
-void list<T>::add(const T& t) {
+void List<T>::add(const T& t) {
     node* new_node = new node(t, m_last);
     if (m_size == 0) {
         m_first = m_last = new_node;
@@ -81,7 +81,7 @@ void list<T>::add(const T& t) {
 }
 
 template <typename T>
-void list<T>::add(T&& t) {
+void List<T>::add(T&& t) {
     node* new_node = new node(std::move(t), m_last);
     if (m_size == 0) {
         m_first = m_last = new_node;
@@ -93,7 +93,7 @@ void list<T>::add(T&& t) {
 }
 
 template <typename T>
-void list<T>::add_first(const T& t) {
+void List<T>::add_first(const T& t) {
     node* new_node = new node(t, nullptr, m_first);
     if (m_size == 0) {
         m_first = m_last = new_node;
@@ -105,7 +105,7 @@ void list<T>::add_first(const T& t) {
 }
 
 template <typename T>
-void list<T>::add_first(T&& t) {
+void List<T>::add_first(T&& t) {
     node* new_node = new node(std::move(t), nullptr, m_first);
     if (m_size == 0) {
         m_first = m_last = new_node;
@@ -117,7 +117,7 @@ void list<T>::add_first(T&& t) {
 }
 
 template <typename T>
-void list<T>::remove_first() {
+void List<T>::remove_first() {
     assume_not_empty();
     memory_utils::destruct(&m_first->m_data);
     if (m_size == 1) {
@@ -132,7 +132,7 @@ void list<T>::remove_first() {
 }
 
 template <typename T>
-void list<T>::remove_last() {
+void List<T>::remove_last() {
     assume_not_empty();
     memory_utils::destruct(&m_last->m_data);
     if (m_size == 1) {
@@ -147,36 +147,36 @@ void list<T>::remove_last() {
 }
 
 template <typename T>
-T& list<T>::first() {
+T& List<T>::first() {
     assume_not_empty();
     return m_first->m_data;
 }
 
 template <typename T>
-const T& list<T>::first() const {
+const T& List<T>::first() const {
     assume_not_empty();
     return m_first->m_data;
 }
 
 template <typename T>
-T& list<T>::last() {
+T& List<T>::last() {
     assume_not_empty();
     return m_last->m_data;
 }
 
 template <typename T>
-const T& list<T>::last() const {
+const T& List<T>::last() const {
     assume_not_empty();
     return m_last->m_data;
 }
 
 template <typename T>
-int list<T>::size() {
+int List<T>::size() {
     return m_size;
 }
 
 template <typename T>
-bool list<T>::empty() {
+bool List<T>::empty() {
     return m_size == 0;
 }
 

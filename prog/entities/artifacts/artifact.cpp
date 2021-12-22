@@ -2,7 +2,7 @@
 
 #include "../characters/character.h"
 
-const vector<artifact::artifact_info> artifact::artifact_infos = {
+const Vector<artifact::artifact_info> artifact::artifact_infos = {
         {
                 "PROTEIN",
                 0,
@@ -70,7 +70,7 @@ const vector<artifact::artifact_info> artifact::artifact_infos = {
         }
 };
 
-artifact::artifact(artifact_id id, geo::i_point coords) : entity(ARTIFACT, coords), m_id(id) {}
+artifact::artifact(artifact_id id, geo::i_point coords) : entity(coords), m_id(id) {}
 
 artifact::artifact_id artifact::id() const {
     return m_id;

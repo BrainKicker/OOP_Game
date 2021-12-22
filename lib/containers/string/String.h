@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "../vector/vector.h"
+#include "../vector/Vector.h"
 #include "../../utils/string_utils.h"
 
 template <typename T>
@@ -14,7 +14,7 @@ using string = basic_string<char>;
 using wstring = basic_string<wchar_t>;
 
 template <typename T>
-class basic_string : public vector<T> {
+class basic_string : public Vector<T> {
 protected:
     void __copy(const T* arr);
 public:
@@ -39,9 +39,9 @@ public:
 template <typename T>
 void basic_string<T>::__copy(const T* arr) {
     int len = string_utils::len<T>(arr);
-    vector<T>::resize(len);
+    Vector<T>::resize(len);
     for (int i = 0; i <= len; ++i)
-        vector<T>::operator[](i) = arr[i];
+        Vector<T>::operator[](i) = arr[i];
 }
 
 template <typename T>
@@ -51,12 +51,12 @@ basic_string<T>::basic_string(const T* arr) {
 
 template<typename T>
 T *basic_string<T>::cstr() {
-    return vector<T>::arr();
+    return Vector<T>::arr();
 }
 
 template<typename T>
 const T *basic_string<T>::cstr() const {
-    return vector<T>::arr();
+    return Vector<T>::arr();
 }
 
 template <typename T>
@@ -83,7 +83,7 @@ basic_string<T>& basic_string<T>::operator+=(const T* arr) {
 
 template <typename T>
 basic_string<T>& basic_string<T>::operator+=(const basic_string<T>& other) {
-    vector<T>::add(other);
+    Vector<T>::add(other);
     return *this;
 }
 
