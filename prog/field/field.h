@@ -36,6 +36,8 @@ class field {
 public:
 
     friend class enemy;
+
+    template <int field_id>
     friend class sfml_adapter;
 
     using field_changer = std::function<void(field&)>;
@@ -103,6 +105,9 @@ public:
     field(field_settings<0> settings, std::shared_ptr<Logger> logger = nullptr);
     field(field_settings<1> settings, std::shared_ptr<Logger> logger = nullptr);
     field(field_settings<2> settings, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<3> settings, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<4> settings, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<5> settings, std::shared_ptr<Logger> logger = nullptr);
 
     ~field();
 

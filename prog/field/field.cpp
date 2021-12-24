@@ -514,10 +514,11 @@ field::field(int id, std::shared_ptr<Logger> logger)
 }
 
 field::field(field_settings<0> settings, std::shared_ptr<Logger> logger) : field(0, logger) {}
-
 field::field(field_settings<1> settings, std::shared_ptr<Logger> logger) : field(1, logger) {}
-
 field::field(field_settings<2> settings, std::shared_ptr<Logger> logger) : field(2, logger) {}
+field::field(field_settings<3> settings, std::shared_ptr<Logger> logger) : field(3, logger) {}
+field::field(field_settings<4> settings, std::shared_ptr<Logger> logger) : field(4, logger) {}
+field::field(field_settings<5> settings, std::shared_ptr<Logger> logger) : field(5, logger) {}
 
 field::~field() {
     clear();

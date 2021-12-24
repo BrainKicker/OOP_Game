@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    sfml_adapter adapter(5);
+    sfml_adapter<5> adapter;
     adapter.get_field()->set_logger(logger);
     adapter.start();
 
