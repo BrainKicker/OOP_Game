@@ -15,6 +15,7 @@
 #include "cell/cell.h"
 
 #include "../geometry/geo.h"
+#include "field_settings.h"
 
 enum class sygnal {
     UP,
@@ -99,6 +100,9 @@ private:
 public:
 
     field(int id, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<0> settings, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<1> settings, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<2> settings, std::shared_ptr<Logger> logger = nullptr);
 
     ~field();
 

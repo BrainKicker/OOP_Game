@@ -513,6 +513,12 @@ field::field(int id, std::shared_ptr<Logger> logger)
     apply_logger();
 }
 
+field::field(field_settings<0> settings, std::shared_ptr<Logger> logger) : field(0, logger) {}
+
+field::field(field_settings<1> settings, std::shared_ptr<Logger> logger) : field(1, logger) {}
+
+field::field(field_settings<2> settings, std::shared_ptr<Logger> logger) : field(2, logger) {}
+
 field::~field() {
     clear();
 }
