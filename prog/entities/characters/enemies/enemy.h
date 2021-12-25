@@ -47,6 +47,9 @@ public:
     enemy_type type() const;
 
     action get_action(const field& f);
+
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_ENEMY_H

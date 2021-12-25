@@ -105,3 +105,17 @@ enemy::enemy_type enemy::type() const {
 action enemy::get_action(const field& f) {
     return enemy_infos[m_type].m_strategy(*this, f);
 }
+
+void enemy::save(std::ostream& out) const {
+    character::save(out);
+    out << m_type << '\n';
+}
+
+void enemy::load(std::istream& in) {
+    character::load(in);
+    int type;
+    in >> type;
+    if (in.fail())
+        throw load_error{};
+    m_type = (enemy_type) type;
+}

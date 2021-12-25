@@ -104,3 +104,40 @@ void character::delete_artifact(int index) {
 void character::delete_artifact_by_id(int id) {
     delete remove_artifact_by_id(id);
 }
+
+void character::save(std::ostream& out) const {
+    entity::save(out);
+    out << m_max_hp << ' ' << m_hp << ' ' << m_damage << ' ' << m_melee << ' ' << m_alive << ' ' << m_artifacts.size() << '\n';
+    for (artifact* art : m_artifacts)
+        art->save(out);
+}
+
+void character::load(std::istream& in) {
+    entity::load(in);
+    in >> m_max_hp;
+    if (in.fail())
+        throw load_error{};
+    in >> m_hp;
+    if (in.fail())
+        throw load_error{};
+    in >> m_damage;
+    if (in.fail())
+        throw load_error{};
+    in >> m_melee;
+    if (in.fail())
+        throw load_error{};
+    in >> m_alive;
+    if (in.fail())
+        throw load_error{};
+    int size;
+    in >> size;
+    if (in.fail())
+        throw load_error{};
+    m_artifacts.resize(size);
+    for (int i = 0; i < size; ++i) {
+        m_artifacts[i] = new artifact((artifact::artifact_id) -1);
+        m_artifacts[i]->load(in);
+        if (in.fail())
+            throw load_error{};
+    }
+}

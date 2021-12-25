@@ -83,3 +83,17 @@ void artifact::act(artifact* art, character* ch) {
 void artifact::react(artifact* art, character* ch) {
     artifact_infos[art->m_id].m_reaction(ch);
 }
+
+void artifact::save(std::ostream& out) const {
+    entity::save(out);
+    out << m_id << '\n';
+}
+
+void artifact::load(std::istream& in) {
+    entity::load(in);
+    int id;
+    in >> id;
+    m_id = (artifact_id) id;
+    if (in.fail())
+        throw load_error{};
+}

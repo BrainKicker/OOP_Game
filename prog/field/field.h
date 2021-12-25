@@ -32,7 +32,7 @@ enum class game_condition {
     LOSE
 };
 
-class field {
+class field : public Savable {
 public:
 
     friend class enemy;
@@ -61,20 +61,22 @@ public:
 
 private:
 
+    inline static const char *const SAVE_FILENAME = "field_save.txt";
+
     inline static const char *const UNKNOWN_SIGNAL_ERROR = "Unknown signal error.";
     inline static const char *const UNKNOWN_CELL_SYMBOL  = "Unknown cell symbol.";
 
     std::shared_ptr<Logger> m_logger;
 
-    int m_id;
-    int m_width, m_height;
-    geo::i_point m_entry, m_exit;
-    Matrix<cell*> m_cells;
-    Matrix<int> m_distances, m_distances_throw_enemies;
+    int m_id = -1;
+    int m_width = -1, m_height = -1;
+    geo::i_point m_entry = { -1, -1 }, m_exit = { -1, -1 };
+    Matrix<cell*> m_cells {0,0};
+    Matrix<int> m_distances {0,0}, m_distances_throw_enemies {0,0};
 
-    player* m_player;
-    Vector<enemy*> m_enemies;
-    Vector<artifact*> m_artifacts;
+    player* m_player = nullptr;
+    Vector<enemy*> m_enemies = Vector<enemy*>(0);
+    Vector<artifact*> m_artifacts = Vector<artifact*>(0);
 
     bool m_instant_step_on_action = true;
 
@@ -91,9 +93,13 @@ private:
     void players_turn();
     void enemies_turn();
 
+    void step();
+
     void check_if_character_dead(character* c);
 
-    void load();
+    void save();
+
+    void load(bool try_from_file = true);
     void reload();
     void clear();
 
@@ -143,7 +149,8 @@ public:
     std::shared_ptr<Logger> get_logger();
     void set_logger(std::shared_ptr<Logger> logger);
 
-    void step();
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_FIELD_H

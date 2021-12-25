@@ -3,18 +3,9 @@
 
 #include "../geometry/geo.h"
 #include "../../lib/utils/logger/Observable.h"
+#include "../../lib/utils/sarialization/Savable.h"
 
-class entity : public Observable {
-public:
-
-    enum entity_type {
-        NONE,
-        ENTITY,
-        ARTIFACT,
-        CHARACTER,
-        PLAYER,
-        ENEMY
-    };
+class entity : public Observable, Savable {
 
 protected:
 
@@ -30,6 +21,9 @@ public:
 
     const geo::i_point& coords() const;
     void set_coords(geo::i_point coords);
+
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_ENTITY_H

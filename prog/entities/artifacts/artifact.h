@@ -45,6 +45,9 @@ public:
 
     static void act(artifact* art, character* ch);
     static void react(artifact* art, character* ch);
+
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_ARTIFACT_H

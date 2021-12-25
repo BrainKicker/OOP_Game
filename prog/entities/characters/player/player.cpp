@@ -13,3 +13,17 @@ direction player::dir() {
 void player::set_dir(direction dir) {
     m_dir = dir;
 }
+
+void player::save(std::ostream& out) const {
+    character::save(out);
+    out << (int) m_dir << '\n';
+}
+
+void player::load(std::istream& in) {
+    character::load(in);
+    int dir;
+    in >> dir;
+    if (in.fail())
+        throw load_error{};
+    m_dir = (direction) dir;
+}

@@ -3,7 +3,7 @@
 
 #include "../../entities/entity.h"
 
-class cell {
+class cell : public Savable {
 public:
 
     enum cell_type {
@@ -29,6 +29,9 @@ public:
     entity*& get_entity();
     const entity *const & get_entity() const;
     void set_entity(class entity* ent);
+
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_CELL_H

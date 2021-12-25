@@ -10,6 +10,7 @@
 #include "../../field/field.h"
 #include "window/RenderWindow.h"
 #include "../../field/Game.h"
+#include "sfml_event_getter.h"
 
 template <int field_id>
 class sfml_adapter {
@@ -49,6 +50,7 @@ private:
     field_s_ptr m_field_p;
 
     RenderWindow* m_window;
+    sfml_event_getter m_event_getter;
 
     void load_images();
 
@@ -103,6 +105,7 @@ template <int field_id>
 void sfml_adapter<field_id>::create_window() {
     delete_window();
     m_window = new RenderWindow(m_window_width, m_window_height, window_name);
+    m_event_getter.set_window(m_window);
 }
 
 template <int field_id>
@@ -116,6 +119,7 @@ void sfml_adapter<field_id>::handle_event(const sf::Event& event) {
     switch (event.type) {
         case sf::Event::Closed:
             m_window->close();
+            m_field_p->save();
             break;
         case sf::Event::Resized:
             m_window_width = m_window->getSize().x;
@@ -156,6 +160,7 @@ void sfml_adapter<field_id>::handle_event(const sf::Event& event) {
                     break;
                 case sf::Keyboard::Escape:
                     m_window->close();
+                    m_field_p->save();
                     break;
                 default:
                     break;
@@ -359,7 +364,7 @@ template <int field_id>
 sfml_adapter<field_id>::sfml_adapter(
         int window_width,
         int window_height
-) : m_window_width(window_width), m_window_height(window_height), m_window(nullptr) {
+) : m_window_width(window_width), m_window_height(window_height), m_window(nullptr), m_event_getter(nullptr) {
     set_game(game_s_ptr(new Game<field_id>()));
     load_images();
 }
@@ -398,12 +403,9 @@ const typename sfml_adapter<field_id>::field_s_ptr& sfml_adapter<field_id>::get_
 template <int field_id>
 void sfml_adapter<field_id>::start() {
     create_window();
-    sf::Event event;
     while (m_window->isOpen()) {
-        while (m_window->waitEvent(event)) {
-            handle_event(event);
-            refresh();
-        }
+        handle_event(m_event_getter.wait_event());
+        refresh();
     }
 }
 

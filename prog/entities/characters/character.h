@@ -66,6 +66,9 @@ public:
 
     [[nodiscard]] artifact* remove_artifact_by_id(int id);
     void delete_artifact_by_id(int id);
+
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_CHARACTER_H

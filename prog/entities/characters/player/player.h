@@ -18,6 +18,9 @@ public:
 
     direction dir();
     void set_dir(direction dir);
+
+    void save(std::ostream &out) const override;
+    void load(std::istream &in) override;
 };
 
 #endif //GAME_PLAYER_H

@@ -230,7 +230,7 @@ const Vector<field::field_template> field::field_templates = {
             }
         },
         {
-            1,
+            6,
                 3, 5,
                 { 0, 4 }, { 2, 4 },
                 {
@@ -440,6 +440,18 @@ void field::enemies_turn() {
     }
 }
 
+void field::step() {
+    if (m_game_condition != game_condition::RUNNING)
+        return;
+    players_turn();
+    if (m_player->coords() == m_exit) {
+        m_game_condition = game_condition::WIN;
+        return;
+    }
+    enemies_turn();
+    m_player->set_dir(direction::NONE);
+}
+
 void field::check_if_character_dead(character* c) {
     if (c->dead()) {
         if (c == m_player) {
@@ -450,7 +462,30 @@ void field::check_if_character_dead(character* c) {
     }
 }
 
-void field::load() {
+void field::save() {
+    std::ofstream out(SAVE_FILENAME);
+    save(out);
+}
+
+void field::load(bool try_from_file) {
+
+    if (try_from_file) {
+        std::ifstream in(SAVE_FILENAME);
+        try {
+            load(in);
+            return;
+        } catch (load_error) {
+            clear();
+        }
+    }
+
+    m_width = field_templates[m_id].m_width;
+    m_height = field_templates[m_id].m_height;
+    m_entry = field_templates[m_id].m_entry;
+    m_exit = field_templates[m_id].m_exit;
+    m_cells = Matrix<cell*>(m_width, m_height);
+    m_distances = Matrix<int>(m_width, m_height);
+    m_distances_throw_enemies = Matrix<int>(m_width, m_height);
 
     m_game_condition = game_condition::RUNNING;
 
@@ -481,19 +516,27 @@ void field::load() {
 
 void field::reload() {
     clear();
-    load();
+    load(false);
 }
 
 void field::clear() {
-    m_cells[m_player->coords().first][m_player->coords().second]->set_entity(nullptr);
+    if (m_player != nullptr
+        && m_player->coords().first >= 0 && m_player->coords().first < width()
+        && m_player->coords().second >= 0 && m_player->coords().second < height()
+        && m_cells[m_player->coords().first][m_player->coords().second] != nullptr)
+        m_cells[m_player->coords().first][m_player->coords().second]->set_entity(nullptr);
     delete m_player;
+    m_player = nullptr;
     while (!m_enemies.empty())
         delete_enemy(m_enemies.size() - 1);
     while (!m_artifacts.empty())
         delete_artifact(m_artifacts.size() - 1);
-    for (int x = 0; x < width(); ++x)
-        for (int y = 0; y < height(); ++y)
+    for (int x = 0; x < m_cells.width(); ++x) {
+        for (int y = 0; y < m_cells.height(); ++y) {
             delete m_cells[x][y];
+            m_cells[x][y] = nullptr;
+        }
+    }
 }
 
 void field::apply_logger() {
@@ -503,12 +546,7 @@ void field::apply_logger() {
 }
 
 field::field(int id, std::shared_ptr<Logger> logger)
-    : m_id(id), m_width(field_templates[id].m_width), m_height(field_templates[id].m_height),
-    m_entry(field_templates[id].m_entry), m_exit(field_templates[id].m_exit),
-    m_cells(m_width, m_height),
-    m_distances(m_width, m_height), m_distances_throw_enemies(m_width, m_height),
-    m_enemies(), m_artifacts(),
-    m_logger(logger) {
+    : m_id(id), m_logger(logger) {
     load();
     apply_logger();
 }
@@ -660,14 +698,125 @@ void field::set_logger(std::shared_ptr<Logger> logger) {
     apply_logger();
 }
 
-void field::step() {
-    if (m_game_condition != game_condition::RUNNING)
-        return;
-    players_turn();
-    if (m_player->coords() == m_exit) {
-        m_game_condition = game_condition::WIN;
-        return;
+void field::save(std::ostream& out) const {
+    out << m_id << ' ' << m_width << ' ' << m_height << ' '
+    << m_entry.first << ' ' << m_entry.second << ' '
+    << m_exit.first << ' ' << m_exit.second << ' '
+    << m_instant_step_on_action << ' ' << (int) m_game_condition << '\n';
+
+    for (const auto& column : m_distances)
+        for (int d : column)
+            out << d << ' ';
+
+    for (const auto& column : m_distances_throw_enemies)
+        for (int d : column)
+            out << d << ' ';
+
+    m_player->save(out);
+    out << m_enemies.size() << '\n';
+    for (const enemy* en : m_enemies)
+        en->save(out);
+    out << m_artifacts.size() << '\n';
+    for (const artifact* art : m_artifacts)
+        art->save(out);
+}
+
+void field::load(std::istream& in) {
+
+    clear();
+
+    in >> m_id;
+    if (in.fail())
+        throw load_error{};
+    in >> m_width;
+    if (in.fail())
+        throw load_error{};
+    in >> m_height;
+    if (in.fail())
+        throw load_error{};
+
+    m_cells = Matrix<cell*>(m_width, m_height);
+    for (auto& column : m_cells)
+        for (cell*& c : column)
+            c = nullptr;
+    m_distances = Matrix<int>(m_width, m_height);
+    m_distances_throw_enemies = Matrix<int>(m_width, m_height);
+
+    in >> m_entry.first;
+    if (in.fail())
+        throw load_error{};
+    in >> m_entry.second;
+    if (in.fail())
+        throw load_error{};
+    in >> m_exit.first;
+    if (in.fail())
+        throw load_error{};
+    in >> m_exit.second;
+    if (in.fail())
+        throw load_error{};
+    in >> m_instant_step_on_action;
+    if (in.fail())
+        throw load_error{};
+    int game_cond;
+    in >> game_cond;
+    if (in.fail())
+        throw load_error{};
+    m_game_condition = (game_condition) game_cond;
+
+    for (auto& column : m_distances) {
+        for (int& d : column) {
+            in >> d;
+            if (in.fail())
+                throw load_error{};
+        }
     }
-    enemies_turn();
-    m_player->set_dir(direction::NONE);
+
+    for (auto& column : m_distances_throw_enemies) {
+        for (int& d : column) {
+            in >> d;
+            if (in.fail())
+                throw load_error{};
+        }
+    }
+
+    // setting cells
+
+    for (int x = 0; x < m_width; ++x) {
+        for (int y = 0; y < m_height; ++y) {
+            char c = field_templates[m_id].m_cells[y][x];
+            switch (c) {
+                case CELL_GROUND_SYMBOL:
+                    m_cells[x][y] = new cell(cell::GROUND);
+                    break;
+                case CELL_WALL_SYMBOL:
+                    m_cells[x][y] = new cell(cell::WALL);
+                    break;
+                default:
+                    throw std::runtime_error(UNKNOWN_CELL_SYMBOL);
+            }
+        }
+    }
+
+    m_player = new player{};
+    m_player->load(in);
+    int size;
+    in >> size;
+    if (in.fail())
+        throw load_error{};
+    for (int i = 0; i < size; ++i) {
+        enemy* en = new enemy(enemy::ZOMBIE);
+        en->load(in);
+        add_enemy(en);
+    }
+    in >> size;
+    if (in.fail())
+        throw load_error{};
+    for (int i = 0; i < size; ++i) {
+        artifact* art = new artifact((artifact::artifact_id) -1);
+        art->load(in);
+        add_artifact(art);
+    }
+
+    move_character(m_player, m_player->coords());
+    evaluate_distances();
 }
