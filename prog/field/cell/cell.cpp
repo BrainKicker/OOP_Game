@@ -32,20 +32,3 @@ const entity *const & cell::get_entity() const {
 void cell::set_entity(entity* ent) {
     m_entity = ent;
 }
-
-void cell::save(std::ostream& out) const {
-    out << m_type << ' ' << m_entity << '\n';
-}
-
-void cell::load(std::istream& in) {
-    int type;
-    in >> type;
-    if (in.fail())
-        throw load_error{};
-    m_type = (cell_type) type;
-    uint64_t ent;
-    in >> ent;
-    if (in.fail())
-        throw load_error{};
-    m_entity = (entity*) ent;
-}

@@ -7,6 +7,8 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "KeyBindings.h"
+
 #include "../../field/field.h"
 #include "window/RenderWindow.h"
 #include "../../field/Game.h"
@@ -131,34 +133,29 @@ void sfml_adapter<field_id>::handle_event(const sf::Event& event) {
         case sf::Event::TextEntered:
             break;
         case sf::Event::KeyPressed:
-            switch (event.key.code) {
-                case sf::Keyboard::W:
-                case sf::Keyboard::Up:
+            switch (KeyBindings::getKey(event.key.code)) {
+                case Key::UP:
                     m_field_p->send_sygnal(sygnal::UP);
                     break;
-                case sf::Keyboard::S:
-                case sf::Keyboard::Down:
+                case Key::DOWN:
                     m_field_p->send_sygnal(sygnal::DOWN);
                     break;
-                case sf::Keyboard::A:
-                case sf::Keyboard::Left:
+                case Key::LEFT:
                     m_field_p->send_sygnal(sygnal::LEFT);
                     break;
-                case sf::Keyboard::D:
-                case sf::Keyboard::Right:
+                case Key::RIGHT:
                     m_field_p->send_sygnal(sygnal::RIGHT);
                     break;
-                case sf::Keyboard::Space:
-                case sf::Keyboard::Enter:
+                case Key::ACTION:
                     m_field_p->send_sygnal(sygnal::STEP);
                     break;
-                case sf::Keyboard::R:
+                case Key::RESTART:
                     m_field_p->send_sygnal(sygnal::RESTART);
                     break;
-                case sf::Keyboard::F11:
+                case Key::FULLSCREEN:
                     m_window->switchFullscreen();
                     break;
-                case sf::Keyboard::Escape:
+                case Key::EXIT:
                     m_window->close();
                     m_field_p->save();
                     break;

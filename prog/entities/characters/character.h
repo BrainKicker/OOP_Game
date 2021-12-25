@@ -19,7 +19,7 @@ protected:
 
     bool m_melee;
 
-    bool m_alive;
+    bool m_alive = true;
 
     Vector<artifact*> m_artifacts {};
 

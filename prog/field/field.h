@@ -114,6 +114,7 @@ public:
     field(field_settings<3> settings, std::shared_ptr<Logger> logger = nullptr);
     field(field_settings<4> settings, std::shared_ptr<Logger> logger = nullptr);
     field(field_settings<5> settings, std::shared_ptr<Logger> logger = nullptr);
+    field(field_settings<6> settings, std::shared_ptr<Logger> logger = nullptr);
 
     ~field();
 

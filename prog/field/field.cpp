@@ -557,6 +557,7 @@ field::field(field_settings<2> settings, std::shared_ptr<Logger> logger) : field
 field::field(field_settings<3> settings, std::shared_ptr<Logger> logger) : field(3, logger) {}
 field::field(field_settings<4> settings, std::shared_ptr<Logger> logger) : field(4, logger) {}
 field::field(field_settings<5> settings, std::shared_ptr<Logger> logger) : field(5, logger) {}
+field::field(field_settings<6> settings, std::shared_ptr<Logger> logger) : field(6, logger) {}
 
 field::~field() {
     clear();
